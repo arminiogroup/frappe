@@ -264,20 +264,19 @@ class DocType(Document):
 			if docfield.fieldtype in no_value_fields:
 				continue
 
-			conflict_type = None
+			message = None
 			field = docfield.fieldname
 			field_label = docfield.label or docfield.fieldname
 
 			if docfield.fieldname in method_set:
-				conflict_type = "controller method"
+				message = _("Field {0} in {1} conflicts with controller method {2}.")
 			if docfield.fieldname in property_set and not docfield.is_virtual:
-				conflict_type = "class property"
+				message = _("Field {0} in {1} conflicts with class property {2}.")
 
-			if conflict_type:
+			if message:
 				frappe.throw(
-					_("Fieldname '{0}' conflicting with a {1} of the name {2} in {3}").format(
-						field_label, conflict_type, field, self.name
-					)
+					message.format(_(field_label, context=self.name), _(self.name), field),
+					title=_("Invalid Fieldname"),
 				)
 
 	def set_defaults_for_single_and_table(self):
@@ -1362,7 +1361,7 @@ def validate_fields(meta: Meta):
 	6. **Hidden** and **Mandatory** are not set simultaneously.
 	7. `Check` type field has default as 0 or 1.
 	8. `Dynamic Links` are correctly defined.
-	9. Precision is set in numeric fields and is between 1 & 6.
+	9. Numeric precision does not exceed the configured total length.
 	10. Fold is not at the end (if set).
 	11. `search_fields` are valid.
 	12. `title_field` and title field pattern are valid.
@@ -1460,10 +1459,6 @@ def validate_fields(meta: Meta):
 				HiddenAndMandatoryWithoutDefaultError,
 			)
 
-	def check_width(d):
-		if d.fieldtype == "Currency" and cint(d.width) < 100:
-			frappe.throw(_("Max width for type Currency is 100px in row {0}").format(d.idx))
-
 	def check_in_list_view(is_table, d):
 		if d.in_list_view and (d.fieldtype in not_allowed_in_list_view):
 			property_label = "In Grid View" if is_table else "In List View"
@@ -1487,8 +1482,9 @@ def validate_fields(meta: Meta):
 			):
 				frappe.throw(
 					_(
-						"Options 'Dynamic Link' type of field must point to another Link Field with options as 'DocType'"
-					)
+						"Options for Dynamic Link field {0} must reference a Select field or a Link field whose options are DocType."
+					).format(frappe.bold(_(d.label or d.fieldname, context=d.parent))),
+					title=_("Invalid Option"),
 				)
 
 	def check_illegal_default(d):
@@ -1516,14 +1512,6 @@ def validate_fields(meta: Meta):
 						frappe.bold(d.fieldname)
 					)
 				)
-
-	def check_precision(d):
-		if (
-			d.fieldtype in ("Currency", "Float", "Percent")
-			and d.precision is not None
-			and not (1 <= cint(d.precision) <= 6)
-		):
-			frappe.throw(_("Precision should be between 1 and 6"))
 
 	def check_unique_and_text(docname, d):
 		if meta.is_virtual:

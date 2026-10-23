@@ -11,6 +11,8 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
+import { translateSelectOption } from "../../utils/translateDocField";
 import { computed } from "vue";
 import { Select } from "frappe-ui";
 import type { FieldComponentEmits, FieldComponentProps } from "./types";
@@ -29,6 +31,16 @@ const value = computed<string | null>({
 
 /** Frappe `Select` options are a newline-joined string in meta. */
 const options = computed(() =>
-	(props.field.options ?? "").split("\n").map((o) => ({ label: o, value: o }))
+	(props.field.options ?? "").split("\n").map((o) => ({
+		label:
+			props.field.fieldtype === "Check"
+				? o === "Yes"
+					? __("Yes")
+					: o === "No"
+					? __("No")
+					: o
+				: translateSelectOption(props.field, o),
+		value: o,
+	}))
 );
 </script>

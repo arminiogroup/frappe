@@ -237,9 +237,7 @@ def check_share_permission(doctype, name, permissions=None, custom_perms=None):
 	:param custom_perms: List of custom permission types for the doctype
 	"""
 	if not frappe.has_permission(doctype, ptype="share", doc=name):
-		frappe.throw(
-			_("No permission to {0} {1} {2}").format("share", _(doctype), name), frappe.PermissionError
-		)
+		frappe.throw(_("No permission to share {0} {1}").format(_(doctype), name), frappe.PermissionError)
 
 	# If permissions specified, validate that the user has those permissions
 	if not permissions:

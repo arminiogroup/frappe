@@ -31,7 +31,7 @@
 				<Button
 					icon="lucide-minus"
 					variant="ghost"
-					:aria-label="translate('Zoom out')"
+					:aria-label="__('Zoom out')"
 					@click="zoomOut({ duration: 150 })"
 				/>
 				<span
@@ -42,14 +42,14 @@
 				<Button
 					icon="lucide-plus"
 					variant="ghost"
-					:aria-label="translate('Zoom in')"
+					:aria-label="__('Zoom in')"
 					@click="zoomIn({ duration: 150 })"
 				/>
 				<span class="mx-1 h-5 w-px border-l border-outline-gray-2" aria-hidden="true" />
 				<Button
 					icon="lucide-maximize"
 					variant="ghost"
-					:aria-label="translate('Fit entire flow')"
+					:aria-label="__('Fit entire flow')"
 					@click="refitFlow()"
 				/>
 			</div>
@@ -68,7 +68,7 @@
 						<AutomationCanvasPicker
 							:options="startOptions"
 							:disabled="!picksStart(data)"
-							:placeholder="translate('Search triggers')"
+							:placeholder="__('Search triggers')"
 							@pick="emit('pick-start', $event)"
 						>
 							<div
@@ -141,13 +141,13 @@
 														class="automation-canvas-dot"
 													/>
 													<span class="automation-canvas-status">
-														{{ translate(nodeState(data).label) }}
+														{{ __(nodeState(data).label) }}
 													</span>
 												</span>
 											</Tooltip>
 											<Badge
 												v-if="data.run?.forced"
-												:label="translate('Forced')"
+												:label="__('Forced')"
 												theme="amber"
 												variant="subtle"
 												size="sm"
@@ -177,13 +177,13 @@
 						<AutomationCanvasPicker
 							:options="blockOptions"
 							side="right"
-							:placeholder="translate('Search blocks')"
+							:placeholder="__('Search blocks')"
 							@pick="addNode(id, data, null, $event)"
 						>
 							<Button
 								icon="lucide-plus"
 								variant="ghost"
-								:aria-label="translate('Add block')"
+								:aria-label="__('Add block')"
 							/>
 						</AutomationCanvasPicker>
 					</div>
@@ -200,7 +200,7 @@
 						icon-left="lucide-play"
 						@click="emit('run-branch', { nodeId: id, arm })"
 					>
-						{{ translate("Run {0}", [arm.label]) }}
+						{{ __("Run {0}", [arm.label]) }}
 					</Button>
 				</div>
 				<div
@@ -214,7 +214,7 @@
 						:key="arm.key"
 						:options="blockOptions"
 						side="right"
-						:placeholder="translate('Search blocks')"
+						:placeholder="__('Search blocks')"
 						@pick="addNode(id, data, arm.key, $event)"
 					>
 						<Button
@@ -229,11 +229,11 @@
 						v-if="data.canContinue"
 						:options="blockOptions"
 						side="right"
-						:placeholder="translate('Search blocks')"
+						:placeholder="__('Search blocks')"
 						@pick="addNode(id, data, null, $event)"
 					>
 						<Button icon-left="lucide-plus" size="sm" class="ml-6">
-							{{ translate("After branches") }}
+							{{ __("After branches") }}
 						</Button>
 					</AutomationCanvasPicker>
 				</div>
@@ -332,7 +332,7 @@ useResizeObserver(canvasRoot, ([entry]) => {
 	if (entry.contentRect.width) refitAfterResize();
 });
 
-function translate(message: string, args: unknown[] = []) {
+function __(message: string, args: unknown[] = []) {
 	const __ = (globalThis as any).__;
 	if (__) return __(message, args);
 	return message.replace(/\{(\d+)\}/g, (match, index) => String(args[index] ?? match));
@@ -466,7 +466,7 @@ function formatDuration(ms?: number) {
 /** The status dot and tooltip are visual only, so the label carries the run result and issue too. */
 function nodeLabel(data: AutomationCanvasNodeData) {
 	const parts = [`${data.kicker}: ${data.label}`];
-	if (data.run) parts.push(translate(RUN_STATES[data.run.status][1]));
+	if (data.run) parts.push(__(RUN_STATES[data.run.status][1]));
 	if (data.issue) parts.push(data.issue.message);
 	return parts.join(". ");
 }

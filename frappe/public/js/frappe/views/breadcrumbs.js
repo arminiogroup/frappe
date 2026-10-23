@@ -202,7 +202,14 @@ frappe.breadcrumbs = {
 			docname_title = __("New {0}", [__(doctype)]);
 		} else if (doc) {
 			const title = frappe.model.get_doc_title(doc);
-			docname_title = __(title);
+			const title_context =
+				!doc.__islocal &&
+				!frappe.get_meta(doctype)?.title_field &&
+				title === String(doc.name) &&
+				(frappe.boot?.translated_doctypes || []).includes(doctype)
+					? doctype
+					: null;
+			docname_title = __(title, null, title_context);
 			if (frappe.utils.is_html(docname_title)) {
 				docname_title = strip_html(docname_title);
 			}

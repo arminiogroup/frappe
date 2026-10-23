@@ -126,7 +126,7 @@ def api(method: str, data: str | dict[str, Any] | None = None):
 	if request.status_code == 200:
 		return request.json().get("message")
 	else:
-		frappe.throw(_("Failed while calling API {0}", method))
+		frappe.throw(_("Failed while calling API {0}").format(method))
 
 
 @frappe.whitelist()

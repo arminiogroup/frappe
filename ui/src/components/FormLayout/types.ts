@@ -84,6 +84,9 @@ export type FieldNode = FieldMeta & {
 export interface RawMetaField {
   fieldname: string;
   fieldtype: string;
+  /** Source DocType, absent on host-supplied presentation fields. */
+  parent?: string;
+  context?: string;
   label?: string;
   options?: string;
   reqd?: boolean | 0 | 1;

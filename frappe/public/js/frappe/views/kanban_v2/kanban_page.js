@@ -138,7 +138,11 @@ frappe.views.KanbanV2Page = class KanbanV2Page {
 				${frappe.ui.button.html({ label: __("Tags"), css_class: "kn-sel-tags" })}
 				<span class="kn-sel-custom flex items-center gap-2"></span>
 				${frappe.ui.button.html({ label: __("Delete"), theme: "red", css_class: "kn-sel-delete" })}
-				${frappe.ui.button.html({ label: __("Clear"), variant: "ghost", css_class: "kn-sel-clear" })}
+				${frappe.ui.button.html({
+					label: __("Clear", null, "Selection"),
+					variant: "ghost",
+					css_class: "kn-sel-clear",
+				})}
 			</div>`).appendTo(this.wrapper);
 
 		const done = () => {
@@ -734,7 +738,9 @@ frappe.views.KanbanV2Page = class KanbanV2Page {
 		}
 		return {
 			fieldtype,
-			label: __(df.label, null, df.parent),
+			label: df.label,
+			parent: df.parent || this.doctype,
+			context: df.context,
 			options,
 			fieldname: df.fieldname,
 			condition,
@@ -855,7 +861,7 @@ frappe.views.KanbanV2Page = class KanbanV2Page {
 		}
 
 		const active = options.find((o) => o.fieldname === this.group_by_field);
-		const label_text = active ? active.label : __("Group");
+		const label_text = active ? active.label : __("Group", null, "Grouping");
 		const button_opts = {
 			label: label_text,
 			icon: "layers",
@@ -882,7 +888,7 @@ frappe.views.KanbanV2Page = class KanbanV2Page {
 		const items = [];
 
 		items.push({
-			label: __("None"),
+			label: __("None", null, "Grouping"),
 			selected: !this.group_by_field,
 			onclick: () => this.set_group_by(null),
 		});

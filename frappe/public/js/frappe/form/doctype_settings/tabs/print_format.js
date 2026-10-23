@@ -8,6 +8,11 @@ frappe.doctype_settings.register("print-format", function (panel, doctype) {
 	let sample_name = null;
 	let thumb_observer = null;
 
+	const print_format_label = (format) =>
+		format.standard === "Yes" && frappe._messages[`${format.name}:Print Format Name`]
+			? frappe._messages[`${format.name}:Print Format Name`]
+			: format.name;
+
 	// Editing a format opens it in the Print Format Builder.
 	const open_edit = (name) => {
 		panel.dialog.hide();
@@ -168,7 +173,7 @@ frappe.doctype_settings.register("print-format", function (panel, doctype) {
 		$thumb.data("pf", f.name);
 
 		// The page thumbnail → full preview.
-		$thumb.on("click", () => preview(f.name));
+		$thumb.on("click", () => preview(f));
 
 		// The star is the set-default control: gold + persistent when default; otherwise
 		// it appears on hover and sets this format as default on click.
@@ -184,7 +189,7 @@ frappe.doctype_settings.register("print-format", function (panel, doctype) {
 
 		$card
 			.find(".dts-pf-name")
-			.text(f.name)
+			.text(print_format_label(f))
 			.on("click", () => open_edit(f.name));
 
 		return $card;
@@ -280,7 +285,8 @@ frappe.doctype_settings.register("print-format", function (panel, doctype) {
 		thumb_observer.observe($thumb[0]);
 	}
 
-	function preview(pf) {
+	function preview(format) {
+		const pf = format.name;
 		if (!sample_name) {
 			frappe.msgprint({
 				title: __("No document to preview"),
@@ -292,7 +298,7 @@ frappe.doctype_settings.register("print-format", function (panel, doctype) {
 			return;
 		}
 		const dialog = new frappe.ui.Dialog({
-			title: __("Preview: {0}", [frappe.utils.escape_html(pf)]),
+			title: __("Preview: {0}", [frappe.utils.escape_html(print_format_label(format))]),
 			size: "large",
 			fields: [{ fieldtype: "HTML", fieldname: "preview" }],
 		});

@@ -18,7 +18,9 @@
 				<slot name="empty">
 					<div class="flex flex-col items-center justify-center gap-3 py-8">
 						<LucideActivity class="h-7 w-7 text-ink-gray-4" />
-						<span class="text-md font-medium text-ink-gray-8">No activity yet</span>
+						<span class="text-md font-medium text-ink-gray-8">{{
+							__("No activity yet")
+						}}</span>
 					</div>
 				</slot>
 			</div>
@@ -121,6 +123,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { LoadingIndicator } from "frappe-ui";
 import { computed, h, ref, useSlots } from "vue";
 import CommentItem from "./CommentItem.vue";

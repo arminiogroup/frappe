@@ -3,7 +3,7 @@
 		<Alert
 			v-if="!nodes.length"
 			theme="amber"
-			:title="t('No valid tree nodes found in the import file.')"
+			:title="__('No valid tree nodes found in the import file.')"
 		/>
 		<template v-else>
 			<Alert
@@ -11,10 +11,12 @@
 				theme="amber"
 				:title="
 					warningCount === 1
-						? t('1 warning found.')
-						: t('{0} warnings found.', [warningCount])
+						? __('1 warning found.')
+						: __('{0} warnings found.', [warningCount])
 				"
-				:description="t('See warning icons on nodes below or check the Warnings section.')"
+				:description="
+					__('See warning icons on nodes below or check the Warnings section.')
+				"
 			/>
 			<div class="flex items-center justify-between gap-2">
 				<TextInput
@@ -22,7 +24,7 @@
 					class="min-w-0 max-w-lg flex-1"
 					type="search"
 					autocomplete="off"
-					:placeholder="t('Filter nodes')"
+					:placeholder="__('Filter nodes')"
 				>
 					<template #prefix>
 						<span class="lucide-search size-4 text-ink-gray-6" />
@@ -33,19 +35,19 @@
 						v-if="!readonly && hasEditedNodes"
 						variant="outline"
 						theme="red"
-						:label="t('Reset all')"
+						:label="__('Reset all')"
 						:disabled="saving"
 						@click="resetAll"
 					/>
 					<Button
 						variant="outline"
-						:label="t('Expand all')"
+						:label="__('Expand all')"
 						:disabled="allExpanded"
 						@click="expanded = [...branchKeys]"
 					/>
 					<Button
 						variant="outline"
-						:label="t('Collapse all')"
+						:label="__('Collapse all')"
 						:disabled="allCollapsed"
 						@click="expanded = []"
 					/>
@@ -100,7 +102,7 @@
 												v-if="isEdited(info(node))"
 												theme="gray"
 												size="sm"
-												:label="t('Edited')"
+												:label="__('Edited')"
 											/>
 										</span>
 										<span v-if="!readonly" class="flex w-4 shrink-0">
@@ -119,7 +121,7 @@
 											class="w-20 shrink-0 text-ink-gray-6"
 										>
 											<template v-if="node.orphan"
-												>({{ t("unlinked") }})</template
+												>({{ __("unlinked") }})</template
 											>
 										</span>
 										<span
@@ -140,7 +142,7 @@
 													size="xs"
 													variant="outline"
 													icon-right="lucide-chevron-down"
-													:label="t('Actions')"
+													:label="__('Actions')"
 													:disabled="saving"
 												/>
 											</Dropdown>
@@ -155,8 +157,8 @@
 					>
 						<span class="whitespace-nowrap">{{
 							totalNodes === 1
-								? t("1 node")
-								: t("Tree preview of {0} nodes", [totalNodes])
+								? __("1 node")
+								: __("Tree preview of {0} nodes", [totalNodes])
 						}}</span>
 					</div>
 				</div>
@@ -179,7 +181,7 @@ import {
 import type { DropdownOption, TreeNode } from "frappe-ui";
 import { computed, ref, watch } from "vue";
 import { cint, isImportComplete } from "../dataImport";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import type { DataImportTreeNode } from "../types";
 import type { UseDataImport } from "../useDataImport";
 
@@ -373,7 +375,7 @@ function moveTargets(node: DataImportTreeNode): DropdownOption[] {
 		...(node.parent
 			? [
 					{
-						label: t("Top level"),
+						label: __("Top level"),
 						icon: "lucide-corner-left-up",
 						onClick: () => moveTo(node, ""),
 					},
@@ -381,37 +383,37 @@ function moveTargets(node: DataImportTreeNode): DropdownOption[] {
 			: []),
 		...targets,
 	];
-	return items.length ? items : [{ label: t("No available parents"), disabled: true }];
+	return items.length ? items : [{ label: __("No available parents"), disabled: true }];
 }
 
 function menuItems(node: DataImportTreeNode) {
 	const items: DropdownOption[] = [];
 	if (editable.value)
 		items.push({
-			label: t("Move to…"),
+			label: __("Move to…"),
 			icon: "lucide-corner-up-right",
 			submenu: moveTargets(node),
 		});
 	if (isGroupEditable.value && !cint(node.is_group))
 		items.push({
-			label: t("Mark as group"),
+			label: __("Mark as group"),
 			icon: "lucide-folder",
 			onClick: () => setGroup(node, 1),
 		});
 	if (isGroupEditable.value && cint(node.is_group) && !hasChildren(node))
 		items.push({
-			label: t("Mark as leaf"),
+			label: __("Mark as leaf"),
 			icon: "lucide-file",
 			onClick: () => setGroup(node, 0),
 		});
 	if (isEdited(node))
 		items.push({
-			label: t("Reset node"),
+			label: __("Reset node"),
 			icon: "lucide-rotate-ccw",
 			theme: "red",
 			onClick: () => resetNode(node),
 		});
-	return items.length ? items : [{ label: t("No actions available"), disabled: true }];
+	return items.length ? items : [{ label: __("No actions available"), disabled: true }];
 }
 
 // Edits change the nodes in place so the tree redraws at once, then save the overrides.

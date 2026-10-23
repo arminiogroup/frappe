@@ -66,7 +66,14 @@ frappe.ui.form.get_breadcrumbs = function (frm) {
 	}
 
 	let title = frappe.model.get_doc_title(frm.doc);
-	title = __(title);
+	const title_context =
+		!frm.doc.__islocal &&
+		!frm.meta.title_field &&
+		title === String(frm.doc.name) &&
+		(frappe.boot?.translated_doctypes || []).includes(frm.doctype)
+			? frm.doctype
+			: null;
+	title = __(title, null, title_context);
 	if (frappe.utils.is_html(title)) title = strip_html(title);
 	items.push({ label: title });
 

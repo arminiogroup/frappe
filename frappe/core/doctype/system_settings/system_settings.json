@@ -417,7 +417,7 @@
   },
   {
    "default": "4",
-   "description": "Will run scheduled jobs only once a day for inactive sites. Set it to 0 to avoid automatically disabling the scheduler.",
+   "description": "On Frappe Cloud, reduce scheduled-job frequency for inactive sites. Set to 0 to keep normal scheduling regardless of inactivity.",
    "fieldname": "dormant_days",
    "fieldtype": "Int",
    "label": "Run Jobs only Daily if Inactive For (Days)"
@@ -856,7 +856,7 @@
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2026-10-19 22:36:28.316692",
+ "modified": "2026-10-21 04:31:51.403254",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",

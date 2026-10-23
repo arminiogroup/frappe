@@ -2,9 +2,9 @@
 	<div class="flex w-full min-w-0 flex-col gap-3">
 		<div class="flex items-end justify-between gap-2">
 			<div class="flex min-w-0 flex-col gap-0.5">
-				<h2 class="text-base-semibold text-ink-gray-8">{{ t("Map columns") }}</h2>
+				<h2 class="text-base-semibold text-ink-gray-8">{{ __("Map columns") }}</h2>
 				<p v-if="!isSuccess" class="text-sm text-ink-gray-6">
-					{{ t("Map each file column to a field.") }}
+					{{ __("Map each file column to a field.") }}
 				</p>
 			</div>
 			<div
@@ -41,7 +41,7 @@
 									i === 0 ? stickyClass : 'relative',
 								]"
 							>
-								<span v-if="i === 0" class="text-ink-gray-5">{{ t("Sr") }}</span>
+								<span v-if="i === 0" class="text-ink-gray-5">{{ __("Sr") }}</span>
 								<Combobox
 									v-else
 									class="w-full"
@@ -83,7 +83,7 @@
 										column.title
 									}}</span>
 									<i v-else class="min-w-0 truncate">{{
-										t("Untitled Column")
+										__("Untitled Column")
 									}}</i>
 									<Dropdown
 										v-if="column.isDate"
@@ -99,7 +99,7 @@
 											:title="
 												column.dateFormat
 													? dateFormatLabel(column.dateFormat)
-													: t('Select date format')
+													: __('Select date format')
 											"
 											:disabled="!canEdit"
 										/>
@@ -141,11 +141,11 @@
 		</TooltipProvider>
 
 		<div v-if="skippedColumns.length" class="flex flex-wrap items-center gap-1.5">
-			<span class="text-sm text-ink-gray-6">{{ t("Not imported:") }}</span>
+			<span class="text-sm text-ink-gray-6">{{ __("Not imported:") }}</span>
 			<Badge
 				v-for="column in skippedColumns"
 				:key="column.index"
-				:label="column.title || t('Untitled Column')"
+				:label="column.title || __('Untitled Column')"
 			/>
 		</div>
 	</div>
@@ -156,7 +156,7 @@ import { Badge, Button, Combobox, Dropdown, Tooltip, TooltipProvider } from "fra
 import { computed, reactive } from "vue";
 import { useColumnResize } from "../../../experimental/List/useColumnResize";
 import { parseJson, pickerColumns, tableFields, type PickerField } from "../dataImport";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import type { DataImportColumn, DocType, ImportProviderSchema } from "../types";
 import type { UseDataImport } from "../useDataImport";
 
@@ -248,12 +248,12 @@ const rowCountText = computed(() => {
 	const total = data.total_number_of_rows ?? visible;
 	const shown = data.max_rows_exceeded ? data.max_rows_in_preview : visible;
 	if (data.max_rows_exceeded || shown! < total)
-		return t("Showing first {0} rows of {1}", [shown, total]);
-	return total === 1 ? t("1 row") : t("Showing all {0} rows", [total]);
+		return __("Showing first {0} rows of {1}", [shown, total]);
+	return total === 1 ? __("1 row") : __("Showing all {0} rows", [total]);
 });
 
 const fieldOptions = computed(() => [
-	{ label: t("Don't Import"), value: DONT_IMPORT },
+	{ label: __("Don't Import"), value: DONT_IMPORT },
 	...fieldsAsOptions(doc.value.reference_doctype, providerSchema.value, doctypeMeta.value),
 ]);
 
@@ -293,9 +293,9 @@ function dateFormatMenu(column: { fieldtype?: string; dateFormat: string | null 
 		formats.unshift({ value: current, label: dateFormatLabel(current), detected: true });
 	return [
 		{
-			group: t("Select date format"),
+			group: __("Select date format"),
 			options: formats.map((format) => ({
-				label: format.detected ? t("{0} (detected)", [format.label]) : format.label,
+				label: format.detected ? __("{0} (detected)", [format.label]) : format.label,
 				selected: format.value === current,
 				onClick: () => setTemplateOption("column_to_date_format_map", i, format.value),
 			})),
@@ -367,9 +367,9 @@ function fieldsAsOptions(
 		fields.map((df) => {
 			const isChild = key !== doctype;
 			const value = isChild ? `${key}.${df.fieldname}` : df.fieldname;
-			const fieldLabel = t(df.label!);
+			const fieldLabel = __(df.label!);
 			const label = isChild
-				? `${fieldLabel} (${t(tableLabel || df.parent || key)})`
+				? `${fieldLabel} (${__(tableLabel || df.parent || key)})`
 				: fieldLabel;
 			return { label, value, description: value };
 		})

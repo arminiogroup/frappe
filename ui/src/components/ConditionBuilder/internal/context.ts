@@ -104,7 +104,7 @@ export const DEFAULT_REORDERABLE = false;
  * go through `{0}`, since a sentence glued from translated halves only reads in
  * English.
  */
-function t(message: string, replace?: unknown[]): string {
+function __(message: string, replace?: unknown[]): string {
   const translate = (
     globalThis as { __?: (m: string, r?: unknown[]) => string }
   ).__;
@@ -124,54 +124,54 @@ function t(message: string, replace?: unknown[]): string {
  */
 export function defaultLabels(): ConditionBuilderLabels {
   return {
-    where: t("Where"),
-    and: t("and"),
-    or: t("or"),
-    matchAll: t("Match all of the following"),
-    matchAny: t("Match any of the following"),
-    conjunctionHint: t("Changes how every condition in this group is joined"),
-    addCondition: t("Add Condition"),
-    addGroup: t("Add Condition Group"),
-    turnIntoGroup: t("Turn into a Group"),
-    ungroup: t("Ungroup Conditions"),
-    remove: t("Remove"),
-    removeGroup: t("Remove Group"),
-    empty: t("Add a Condition"),
-    rowActions: t("Condition actions"),
-    groupActions: t("Group actions"),
-    field: t("Field"),
-    operator: t("Operator"),
-    value: t("Value"),
-    fieldsError: t("Could not load this doctype's fields."),
-    retryFields: t("Retry"),
+    where: __("Where"),
+    and: __("and"),
+    or: __("or"),
+    matchAll: __("Match all of the following"),
+    matchAny: __("Match any of the following"),
+    conjunctionHint: __("Changes how every condition in this group is joined"),
+    addCondition: __("Add Condition"),
+    addGroup: __("Add Condition Group"),
+    turnIntoGroup: __("Turn into a Group"),
+    ungroup: __("Ungroup Conditions"),
+    remove: __("Remove"),
+    removeGroup: __("Remove Group"),
+    empty: __("Add a Condition"),
+    rowActions: __("Condition actions"),
+    groupActions: __("Group actions"),
+    field: __("Field"),
+    operator: __("Operator"),
+    value: __("Value"),
+    fieldsError: __("Could not load this doctype's fields."),
+    retryFields: __("Retry"),
     removed: (remaining, groupRemoved) =>
       [
-        t("Condition removed."),
-        groupRemoved ? t("Its group was left empty and was removed too.") : "",
-        t("{0} remaining.", [remaining]),
+        __("Condition removed."),
+        groupRemoved ? __("Its group was left empty and was removed too.") : "",
+        __("{0} remaining.", [remaining]),
       ]
         .filter(Boolean)
         .join(" "),
     movedToGroup: (name, to, total) =>
       name
-        ? t("{0} moved into another group, at position {1} of {2}.", [
+        ? __("{0} moved into another group, at position {1} of {2}.", [
             name,
             to,
             total,
           ])
-        : t("Condition moved into another group, at position {0} of {1}.", [
+        : __("Condition moved into another group, at position {0} of {1}.", [
             to,
             total,
           ]),
     moved: (name, from, to, total) =>
       name
-        ? t("{0} moved from position {1} to position {2} of {3}.", [
+        ? __("{0} moved from position {1} to position {2} of {3}.", [
             name,
             from,
             to,
             total,
           ])
-        : t("Condition moved from position {0} to position {1} of {2}.", [
+        : __("Condition moved from position {0} to position {1} of {2}.", [
             from,
             to,
             total,
@@ -186,11 +186,11 @@ export function defaultLabels(): ConditionBuilderLabels {
 export function uncachedLabels(
   read: () => ConditionBuilderLabels
 ): Ref<ConditionBuilderLabels> {
-  let probe = t("Where");
+  let probe = __("Where");
   return customRef((track, trigger) => ({
     get() {
       track();
-      const current = t("Where");
+      const current = __("Where");
       if (current !== probe) {
         probe = current;
         queueMicrotask(trigger);

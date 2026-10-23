@@ -15,7 +15,7 @@ frappe.ui.Filter = class {
 		this.conditions = [
 			["=", __("Equals")],
 			["!=", __("Not Equals")],
-			["like", __("Like")],
+			["like", __("Like", null, "Filter Operator")],
 			["not like", __("Not Like")],
 			["in", __("In")],
 			["not in", __("Not In")],
@@ -503,7 +503,10 @@ frappe.ui.Filter = class {
 			this.field,
 			this.get_selected_label() || this.get_selected_value()
 		);
-		return `${__(this.field.df.label)} ${__(this.get_condition())} ${__(value)}`;
+		let condition =
+			this.filter_edit_area.find(".condition option:selected").text() ||
+			__(this.get_condition());
+		return `${__(this.field.df.label)} ${condition} ${__(value)}`;
 	}
 
 	get_filter_tag_element() {
@@ -542,7 +545,7 @@ frappe.ui.Filter = class {
 			} else {
 				this.filter_edit_area
 					.find(`.condition option[value="${condition[0]}"]`)
-					.text(__(condition[1]));
+					.text(condition[1]);
 			}
 		}
 	}

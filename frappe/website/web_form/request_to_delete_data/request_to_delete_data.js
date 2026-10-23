@@ -3,10 +3,10 @@ frappe.ready(function () {
 		frappe.call({
 			method: "frappe.website.doctype.website_settings.website_settings.get_auto_account_deletion",
 			callback: (data) => {
-				if (data.message) {
+				if (data.message >= 1) {
 					const intro_wrapper = $("#introduction .ql-editor.read-mode");
 					const sla_description = __(
-						"Note: Your request for account deletion will be fulfilled within {0} hours.",
+						"If you confirm your deletion request and it remains pending, automatic processing can start {0} hours after the request was created.",
 						[data.message]
 					);
 					const sla_description_wrapper = `<br><b>${sla_description}</b>`;

@@ -3819,10 +3819,13 @@ class Document(_DocumentBase):
 		else:
 			reference = f"{_(self.doctype)} {self.name}"
 
+		if frappe.db.type_map[df.fieldtype][0] == "varchar":
+			message = _("{0}: '{1}' ({3}) exceeds the maximum length of {2} characters.")
+		else:
+			message = _("{0}: '{1}' ({3}) must be between -{2} and {2}.")
+
 		frappe.throw(
-			_("{0}: '{1}' ({3}) will get truncated, as max characters allowed is {2}").format(
-				reference, frappe.bold(_(df.label, context=df.parent)), max_length, value
-			),
+			message.format(reference, frappe.bold(_(df.label, context=df.parent)), max_length, value),
 			frappe.CharacterLengthExceededError,
 			title=_("Value too big"),
 		)

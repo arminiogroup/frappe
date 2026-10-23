@@ -1,11 +1,12 @@
 import importlib
 from pathlib import Path
 
+from frappe.gettext.extractors.python import extract as extract_python
 from frappe.utils import get_bench_path
 
 
 def extract(fileobj, *args, **kwargs):
-	"""Extract standard navbar and help items from a python file.
+	"""Extract standard navbar/help labels and explicit Python translation calls.
 
 	:param fileobj: file-like object to extract messages from. Should be a
 	    python file containing two global variables `standard_navbar_items` and
@@ -42,6 +43,8 @@ def extract(fileobj, *args, **kwargs):
 						f"Type: {item_type}",
 					],
 				)
+
+	yield from extract_python(fileobj, *args, **kwargs)
 
 
 def get_module(path):

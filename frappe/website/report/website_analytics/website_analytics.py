@@ -45,7 +45,7 @@ class WebsiteAnalytics:
 		return [
 			{
 				"fieldname": group_by.fieldname,
-				"label": group_by.label,
+				"label": meta.get_translated_label(group_by.fieldname),
 				"fieldtype": "Data",
 				"width": 500,
 				"align": "left",

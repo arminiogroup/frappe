@@ -1,11 +1,12 @@
 <template>
 	<!-- default Load More control; override via the timeline's #load_more slot -->
 	<Button :loading="loading" :icon-left="icon ?? 'lucide-refresh-cw'">
-		{{ label ?? "Load more" }}
+		{{ label ?? __("Load more") }}
 	</Button>
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { Button } from "frappe-ui";
 import type { Component } from "vue";
 

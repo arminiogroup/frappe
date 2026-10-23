@@ -118,8 +118,30 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 				if (data.name == this.prepared_report_doc_name) {
 					this.refresh();
 				} else {
-					let alert_message = `Report ${this.report_name} generated.
-						<a href="#query-report/${this.report_name}/?prepared_report_name=${data.name}">View</a>`;
+					const report_name = data.report_name;
+					const is_standard =
+						data.is_standard === true ||
+						(data.is_standard === undefined &&
+							report_name === this.report_name &&
+							this.report_doc?.is_standard === "Yes");
+					const report_label = frappe.utils.escape_html(
+						is_standard ? __(report_name) : report_name
+					);
+					const message =
+						data.status === "Completed"
+							? __("Report {0} is ready.", [report_label])
+							: data.status === "Error"
+							? __("Report {0} failed to generate.", [report_label])
+							: __("Report {0} has finished processing.", [report_label]);
+					const report_link = `${frappe.router.make_url([
+						"query-report",
+						report_name,
+					])}?${new URLSearchParams({
+						prepared_report_name: data.name,
+					})}`;
+					const alert_message = `${message} <a href="${report_link}">${frappe.utils.escape_html(
+						__("View")
+					)}</a>`;
 					frappe.show_alert({ message: alert_message, indicator: "orange" });
 				}
 			}
@@ -1180,8 +1202,8 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 
 		if (data.length > (cint(frappe.boot.sysdefaults.max_report_rows) || 100000)) {
 			let msg = __(
-				"This report contains {0} rows and is too big to display in browser, you can {1} this report instead.",
-				[cstr(format_number(data.length, null, 0)).bold(), __("export").bold()]
+				"This report contains {0} rows and is too big to display in browser, you can <b>export</b> this report instead.",
+				[cstr(format_number(data.length, null, 0)).bold()]
 			);
 
 			if (this.datatable) {

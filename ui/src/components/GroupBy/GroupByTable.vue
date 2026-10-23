@@ -122,8 +122,9 @@ import {
 import { computed } from "vue";
 import { useDoctypeMeta } from "../../composables/useDoctypeMeta";
 import { translate as __ } from "../../utils/translate";
+import { translateSelectOption } from "../../utils/translateDocField";
 import {
-	AGGREGATE_FUNCTIONS,
+	aggregateFunctionLabel,
 	aggregateKey,
 	columnId,
 	effectiveSort,
@@ -166,7 +167,9 @@ const columns = computed<GroupByColumn[]>(() => [
 		return {
 			key: fieldname,
 			id: columnId(fieldname),
-			label: __(field?.label ?? fieldname),
+			label: field?.label ?? fieldname,
+			parent: field?.parent,
+			context: field?.context,
 			kind: "group" as const,
 			align: ALIGN.group,
 			fieldtype: field?.fieldtype,
@@ -174,7 +177,7 @@ const columns = computed<GroupByColumn[]>(() => [
 		};
 	}),
 	...props.groupBy.aggregates.map((a, i) => {
-		const fn = AGGREGATE_FUNCTIONS.find((f) => f.value === a.function)?.label ?? "";
+		const fn = aggregateFunctionLabel(a.function);
 		const field =
 			a.function === "count" ? undefined : findGroupByField(metaFields.value, a.fieldname);
 		return {
@@ -183,7 +186,7 @@ const columns = computed<GroupByColumn[]>(() => [
 			label:
 				a.function === "count"
 					? __("Count")
-					: __("{0} of {1}", [__(fn), __(field?.label ?? a.fieldname)]),
+					: __("{0} of {1}", [fn, field?.label ?? a.fieldname]),
 			kind: "aggregate" as const,
 			align: ALIGN.aggregate,
 			fieldtype: a.function === "count" ? "Int" : field?.fieldtype,
@@ -262,6 +265,17 @@ function cellText(row: Record<string, unknown>, column: GroupByColumn): string {
 	}
 	if (value === null || value === undefined || value === "") return __("Not Set");
 	if (column.fieldtype === "Check") return value ? __("Yes") : __("No");
+	if (column.fieldtype === "Select") {
+		return translateSelectOption(
+			{
+				parent: column.parent,
+				fieldname: column.key,
+				context: column.context,
+				fieldtype: "Select",
+			},
+			String(value)
+		);
+	}
 	return String(value);
 }
 </script>

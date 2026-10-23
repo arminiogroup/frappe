@@ -44,7 +44,8 @@
 						<th style="width: 40px" class="table-sr">{{ _("Sr") }}</th>
 						{% for tdf in visible_columns %}
 						<th style="width: {{ get_width(tdf) }};" class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
-							{{ _(tdf.label) }}</th>
+							{%- set canonical_df = table_meta.fields|selectattr("fieldname", "equalto", tdf.fieldname)|first|default(none) -%}
+							{{ _(tdf.label, context=table_meta.name if canonical_df and tdf.label == canonical_df.label else none) }}</th>
 						{% endfor %}
 					</tr>
 				</thead>

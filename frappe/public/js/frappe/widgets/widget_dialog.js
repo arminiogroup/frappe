@@ -240,7 +240,7 @@ class ChartDialog extends WidgetDialog {
 	}
 
 	process_data(data) {
-		data.label = data.label ? data.label : __(data.chart_name);
+		data.label = data.label ? data.label : __(data.chart_name, null, "Dashboard Chart");
 		return data;
 	}
 }
@@ -431,7 +431,7 @@ class CardDialog extends WidgetDialog {
 						default: "0",
 						fieldname: "is_query_report",
 						fieldtype: "Check",
-						label: __("Is Query Report"),
+						label: __("Query, Script, or Custom Report"),
 					},
 				],
 			},

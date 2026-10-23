@@ -1,4 +1,4 @@
-import { t } from "./translate";
+import { t as __ } from "./translate";
 import type {
   DataImportDoc,
   DataImportPreview,
@@ -144,7 +144,7 @@ export const tableFields = (meta: DocType | null | undefined) =>
 export const pickerColumns = (
   meta: DocType | null | undefined
 ): PickerField[] => [
-  { label: t("ID"), fieldname: "name", fieldtype: "Data", reqd: 1 },
+  { label: __("ID"), fieldname: "name", fieldtype: "Data", reqd: 1 },
   ...(meta?.fields ?? []).filter(
     (df) =>
       !NO_VALUE_FIELDTYPES.includes(df.fieldtype) &&

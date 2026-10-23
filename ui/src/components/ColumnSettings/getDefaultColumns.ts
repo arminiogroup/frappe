@@ -1,10 +1,12 @@
+import { translate as __ } from "../../utils/translate";
+import { translateDocFieldText } from "../../utils/translateDocField";
 import type { RawMetaField } from "../FormLayout/types";
 import type { Column, SyntheticColumn } from "./types";
 
 /** The `name` standard field — the default leading column when the doctype has
  *  no `title_field`. The list always surfaces the record's identifier first (the
  *  column analog of the Name quick filter in `getQuickFilterFields`). */
-const nameColumn = (): Column => ({ fieldname: "name", label: "Name" });
+const nameColumn = (): Column => ({ fieldname: "name", label: __("Name") });
 
 /** The leading column for a default set: the doctype's `title_field` when set
  *  (Frappe surfaces the human-readable title in place of the opaque `name`),
@@ -14,7 +16,10 @@ function leadingColumn(fields: RawMetaField[], titleField?: string): Column {
   if (!titleField) return nameColumn();
   const field = fields.find((f) => f.fieldname === titleField);
   if (!field) return nameColumn();
-  return { fieldname: field.fieldname, label: field.label ?? field.fieldname };
+  return {
+    fieldname: field.fieldname,
+    label: translateDocFieldText(field, field.label) ?? field.fieldname,
+  };
 }
 
 /**
@@ -36,7 +41,10 @@ export function getDefaultColumns(
     leading,
     ...fields
       .filter((f) => f.in_list_view && f.fieldname !== leading.fieldname)
-      .map((f) => ({ fieldname: f.fieldname, label: f.label ?? f.fieldname })),
+      .map((f) => ({
+        fieldname: f.fieldname,
+        label: translateDocFieldText(f, f.label) ?? f.fieldname,
+      })),
   ];
 }
 

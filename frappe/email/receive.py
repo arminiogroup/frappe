@@ -159,7 +159,11 @@ class EmailServer:
 				return False
 
 			else:
-				frappe.msgprint(_("Invalid User Name or Support Password. Please rectify and try again."))
+				frappe.msgprint(
+					_(
+						"Could not complete the POP3 connection. Check the email account settings and try again."
+					)
+				)
 				raise
 
 	def select_imap_folder(self, folder):

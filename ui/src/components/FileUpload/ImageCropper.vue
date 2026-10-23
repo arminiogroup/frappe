@@ -18,7 +18,7 @@
 					:key="preset.label"
 					size="sm"
 					:variant="activePreset === preset.label ? 'solid' : 'subtle'"
-					:label="preset.label"
+					:label="preset.label === 'Free' ? __('Free aspect ratio') : preset.label"
 					@click="setAspect(preset.label, preset.value)"
 				/>
 			</div>
@@ -26,25 +26,26 @@
 				size="sm"
 				variant="subtle"
 				icon="lucide-rotate-ccw"
-				aria-label="Rotate left"
+				:aria-label="__('Rotate left')"
 				@click="rotate(-90)"
 			/>
 			<Button
 				size="sm"
 				variant="subtle"
 				icon="lucide-rotate-cw"
-				aria-label="Rotate right"
+				:aria-label="__('Rotate right')"
 				@click="rotate(90)"
 			/>
 			<div class="ml-auto flex items-center gap-2">
-				<Button variant="subtle" label="Cancel" @click="emit('cancel')" />
-				<Button variant="solid" label="Apply" @click="apply" />
+				<Button variant="subtle" :label="__('Cancel')" @click="emit('cancel')" />
+				<Button variant="solid" :label="__('Apply')" @click="apply" />
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 // Image cropper backed by cropperjs v2, lazy-imported exactly like
 // GeolocationField does for Leaflet — so cropperjs stays out of the static
 // registry import graph and is code-split into a chunk loaded only when a crop
@@ -84,7 +85,7 @@ onMounted(async () => {
 	try {
 		await initCropper();
 	} catch {
-		loadError.value = "The image editor failed to load.";
+		loadError.value = __("The image editor failed to load.");
 	}
 });
 

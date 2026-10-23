@@ -4,7 +4,7 @@
 		class="flex w-full flex-col gap-3"
 		role="status"
 		aria-busy="true"
-		:aria-label="t('Checking import file for issues...')"
+		:aria-label="__('Checking import file for issues...')"
 	>
 		<Skeleton class="h-5 w-[55%] rounded" />
 		<Skeleton class="h-3.5 w-full rounded" />
@@ -15,7 +15,7 @@
 	</div>
 
 	<div v-else class="flex w-full flex-col gap-4">
-		<StatCards v-if="hasImportFile" :stats="stats" :label="t('Fix issues summary')">
+		<StatCards v-if="hasImportFile" :stats="stats" :label="__('Fix issues summary')">
 			<template #label="{ stat }">
 				<SkippedColumns
 					v-if="stat.label === columnsSkippedLabel && skippedColumns.length"
@@ -35,12 +35,12 @@
 			</template>
 		</StatCards>
 		<div v-if="!hasIssues" class="flex min-w-0 flex-col gap-0.5">
-			<h2 class="text-base-semibold text-ink-gray-8">{{ t("No issues to fix") }}</h2>
+			<h2 class="text-base-semibold text-ink-gray-8">{{ __("No issues to fix") }}</h2>
 			<p class="text-sm text-ink-gray-6">{{ emptyDescription }}</p>
 		</div>
 		<div v-else class="flex w-full flex-col divide-y divide-outline-gray-2 text-base">
 			<section v-if="rowErrors.length" class="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
-				<h2 class="text-base-semibold text-ink-gray-8">{{ t("Row errors") }}</h2>
+				<h2 class="text-base-semibold text-ink-gray-8">{{ __("Row errors") }}</h2>
 				<div data-slot="scroll" class="flex max-h-72 flex-col gap-3 overflow-y-auto">
 					<div
 						v-for="{ row, lines } in rowErrors"
@@ -55,7 +55,7 @@
 										type="button"
 										class="text-base-semibold text-ink-gray-9 underline underline-offset-2"
 									>
-										{{ t("Row {0}", [row]) }}
+										{{ __("Row {0}", [row]) }}
 									</button>
 								</template>
 								<div class="max-w-[min(90vw,56rem)] overflow-x-auto p-2">
@@ -85,7 +85,7 @@
 										</tbody>
 									</table>
 									<div v-else class="text-sm text-ink-gray-6">
-										{{ t("No preview data for this row") }}
+										{{ __("No preview data for this row") }}
 									</div>
 								</div>
 							</HoverCard>
@@ -93,7 +93,7 @@
 								size="xs"
 								variant="outline"
 								class="shrink-0"
-								:label="skippedRows.has(row) ? t('Undo Skip') : t('Skip Row')"
+								:label="skippedRows.has(row) ? __('Undo Skip') : __('Skip Row')"
 								:disabled="running"
 								@click="toggleSkipRows([row])"
 							/>
@@ -112,12 +112,12 @@
 				v-if="showMappingSection"
 				class="flex flex-col gap-3 py-4 first:pt-0 last:pb-0"
 			>
-				<h2 class="text-base-semibold text-ink-gray-8">{{ t("Mapping warnings") }}</h2>
+				<h2 class="text-base-semibold text-ink-gray-8">{{ __("Mapping warnings") }}</h2>
 				<div
 					v-if="mappingColumnsHtml"
 					class="leading-normal text-ink-gray-7"
 					v-html="
-						t(
+						__(
 							'Some columns have invalid values. Map them to valid values below, or skip the rows that have them. Affected columns: {0}.',
 							[mappingColumnsHtml]
 						)
@@ -134,26 +134,26 @@
 						>
 							<tr>
 								<th class="w-16 whitespace-nowrap px-3 py-2 font-medium">
-									{{ t("No.") }}
+									{{ __("No.") }}
 								</th>
 								<th class="w-40 whitespace-nowrap px-3 py-2 font-medium">
-									{{ t("Column") }}
+									{{ __("Column") }}
 								</th>
 								<th class="whitespace-nowrap px-3 py-2 font-medium">
-									{{ t("Value in File") }}
+									{{ __("Value in File") }}
 								</th>
 								<th class="w-28 whitespace-nowrap px-3 py-2 font-medium">
-									{{ t("No. of Rows") }}
+									{{ __("No. of Rows") }}
 								</th>
 								<th class="w-64 whitespace-nowrap px-3 py-2 font-medium">
-									{{ t("Map To") }}
+									{{ __("Map To") }}
 								</th>
 								<th class="w-24 px-3 py-2 font-medium">
 									<div class="flex items-center justify-center gap-2">
-										<span>{{ t("Skip") }}</span>
+										<span>{{ __("Skip") }}</span>
 										<Checkbox
 											data-slot="skip-all"
-											:aria-label="t('Skip all')"
+											:aria-label="__('Skip all')"
 											:modelValue="allValuesSkipped"
 											:indeterminate="!allValuesSkipped && someValuesSkipped"
 											:disabled="!skippableMappings.length"
@@ -193,7 +193,7 @@
 										:doctype="mapping.link_doctype"
 										:placeholder="
 											mapping.create_new
-												? t('Create {0}', [mapping.source_value])
+												? __('Create {0}', [mapping.source_value])
 												: undefined
 										"
 										:disabled="!canMap(mapping)"
@@ -208,7 +208,7 @@
 										</template>
 										<template #item-create>
 											<span class="truncate">
-												{{ t("Create {0}", [mapping.source_value]) }}
+												{{ __("Create {0}", [mapping.source_value]) }}
 											</span>
 										</template>
 									</Link>
@@ -236,7 +236,7 @@
 									<div class="flex justify-center">
 										<Checkbox
 											data-slot="skip-value"
-											:aria-label="t('Skip')"
+											:aria-label="__('Skip')"
 											:modelValue="isValueSkipped(mapping)"
 											:disabled="!canSkipValue(mapping)"
 											@update:modelValue="
@@ -263,7 +263,7 @@
 						:data-col="warning.col"
 					>
 						<span class="w-20 shrink-0 text-sm text-ink-gray-5">
-							{{ t("Column {0}", [warning.col]) }}
+							{{ __("Column {0}", [warning.col]) }}
 						</span>
 						<div class="min-w-0 text-ink-gray-8" v-html="warning.message" />
 					</li>
@@ -274,7 +274,7 @@
 				v-if="otherWarnings.length"
 				class="flex flex-col gap-3 py-4 first:pt-0 last:pb-0"
 			>
-				<h2 class="text-base-semibold text-ink-gray-8">{{ t("Issues") }}</h2>
+				<h2 class="text-base-semibold text-ink-gray-8">{{ __("Issues") }}</h2>
 				<div data-slot="scroll" class="flex max-h-48 flex-col gap-3 overflow-y-auto">
 					<div
 						v-for="(warning, index) in otherWarnings"
@@ -293,8 +293,8 @@
 							class="shrink-0"
 							:label="
 								duplicateSkipped(warning)
-									? t('Undo Skip Duplicates')
-									: t('Keep Row {0}, Skip Rest', [warning.rows[0]])
+									? __('Undo Skip Duplicates')
+									: __('Keep Row {0}, Skip Rest', [warning.rows[0]])
 							"
 							:disabled="running"
 							@click="toggleSkipRows(warning.rows.slice(1))"
@@ -318,7 +318,7 @@ import {
 	previewRowCells,
 	skipRows,
 } from "../dataImport";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import type { DataImportColumn, DataImportValueMapping, DataImportWarning } from "../types";
 import type { UseDataImport } from "../useDataImport";
 import SkippedColumns from "./SkippedColumns.vue";
@@ -375,7 +375,7 @@ const columnWarnings = computed(() => allColumnWarnings.value.filter((w) => !isS
 const skippedColumns = computed(() =>
 	allColumnWarnings.value.filter(isSkippedColumn).map((w) => ({
 		col: w.col,
-		label: columns.value[w.col]?.header_title || t("Column {0}", [w.col]),
+		label: columns.value[w.col]?.header_title || __("Column {0}", [w.col]),
 	}))
 );
 
@@ -388,24 +388,24 @@ const showMappingSection = computed(
 const mappingColumnsHtml = computed(() => {
 	const labels = new Set(
 		mappingWarnings.value.map(
-			(w) => columns.value[w.col]?.header_title || t("Column {0}", [w.col])
+			(w) => columns.value[w.col]?.header_title || __("Column {0}", [w.col])
 		)
 	);
 	return [...labels].map((label) => `<strong>${escapeHtml(label)}</strong>`).join(", ");
 });
 
 const previewHeaders = computed(() =>
-	columns.value.map((col, i) => col.header_title || col.df?.label || t("Column {0}", [i]))
+	columns.value.map((col, i) => col.header_title || col.df?.label || __("Column {0}", [i]))
 );
 
 const emptyDescription = computed(() => {
-	if (!hasImportFile.value) return t("Attach an import file to validate rows and mappings.");
+	if (!hasImportFile.value) return __("Attach an import file to validate rows and mappings.");
 	if (isComplete.value)
-		return t("This import is complete. There are no pending warnings or mapping issues.");
-	return t("No warnings or mapping issues were found. You can continue to import.");
+		return __("This import is complete. There are no pending warnings or mapping issues.");
+	return __("No warnings or mapping issues were found. You can continue to import.");
 });
 
-const columnsSkippedLabel = t("Columns skipped");
+const columnsSkippedLabel = __("Columns skipped");
 const stats = computed((): Stat[] => {
 	const data = readyPreview.value;
 	const rowsChecked =
@@ -414,10 +414,10 @@ const stats = computed((): Stat[] => {
 		(col) => !isSrNoColumn(col) && !col.skip_import && !!col.df
 	).length;
 	return [
-		{ value: rowsChecked, label: t("Rows checked") },
-		{ value: columnsMatched, label: t("Columns matched") },
+		{ value: rowsChecked, label: __("Rows checked") },
+		{ value: columnsMatched, label: __("Columns matched") },
 		{ value: skippedColumns.value.length, label: columnsSkippedLabel },
-		{ value: doc.value.skipped_rows.length, label: t("Rows skipped") },
+		{ value: doc.value.skipped_rows.length, label: __("Rows skipped") },
 	];
 });
 
@@ -506,6 +506,6 @@ function toggleSkipRows(rows: number[]) {
 }
 
 function isSrNoColumn(col: DataImportColumn) {
-	return col.header_title === "Sr. No" || col.header_title === t("Sr. No");
+	return col.header_title === "Sr. No" || col.header_title === __("Sr. No");
 }
 </script>

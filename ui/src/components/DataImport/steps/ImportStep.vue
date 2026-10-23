@@ -10,11 +10,11 @@
 			<div class="flex flex-col gap-2">
 				<div class="flex min-w-0 flex-col gap-0.5">
 					<h2 class="text-base-semibold text-ink-gray-8">
-						{{ t("Importing your data") }}
+						{{ __("Importing your data") }}
 					</h2>
 					<p class="text-sm text-ink-gray-6">
 						{{
-							t(
+							__(
 								"You can continue other work while this runs. Progress updates will appear here."
 							)
 						}}
@@ -36,7 +36,7 @@
 			<div class="flex flex-col gap-1">
 				<div class="flex items-center gap-1">
 					<span class="text-sm-semibold text-ink-gray-7">{{
-						t("Recent activity")
+						__("Recent activity")
 					}}</span>
 					<span class="lucide-dot size-4 text-ink-green-8" />
 				</div>
@@ -60,14 +60,14 @@
 							v-if="item.row"
 							class="shrink-0 whitespace-nowrap text-sm text-ink-gray-6"
 						>
-							{{ t("Row {0}", [item.row]) }}
+							{{ __("Row {0}", [item.row]) }}
 						</span>
 					</li>
 					<li
 						v-if="!progress.recentActivity.length"
 						class="py-1 text-sm text-ink-gray-6"
 					>
-						{{ t("Live activity updates will appear here.") }}
+						{{ __("Live activity updates will appear here.") }}
 					</li>
 				</ul>
 			</div>
@@ -92,12 +92,12 @@
 						class="shrink-0"
 						variant="outline"
 						size="sm"
-						:label="t('Go to list')"
+						:label="__('Go to list')"
 						icon-right="lucide-arrow-up-right"
 						@click="onOpenList(doc.reference_doctype)"
 					/>
 				</div>
-				<StatCards :stats="resultStats" :label="t('Result')" />
+				<StatCards :stats="resultStats" :label="__('Result')" />
 
 				<div class="flex items-center justify-between gap-4">
 					<dl class="flex min-w-0 flex-wrap gap-x-6 gap-y-1 text-sm text-ink-gray-6">
@@ -123,13 +123,13 @@
 				<TabButtons
 					v-model="logFilter"
 					:options="filterOptions"
-					:aria-label="t('Filter import log')"
+					:aria-label="__('Filter import log')"
 				/>
 				<Button
 					v-if="showExport"
 					variant="outline"
 					size="sm"
-					:label="t('Export Import Log')"
+					:label="__('Export Import Log')"
 					icon-left="lucide-download"
 					@click="download('download_import_log')"
 				/>
@@ -142,17 +142,17 @@
 							<th
 								class="w-[10%] border-b border-outline-gray-2 px-4 py-2 text-sm-semibold"
 							>
-								{{ t("Row") }}
+								{{ __("Row") }}
 							</th>
 							<th
 								class="w-[14%] border-b border-outline-gray-2 px-4 py-2 text-sm-semibold"
 							>
-								{{ t("Status") }}
+								{{ __("Status") }}
 							</th>
 							<th
 								class="w-[76%] border-b border-outline-gray-2 px-4 py-2 text-sm-semibold"
 							>
-								{{ t("Message") }}
+								{{ __("Message") }}
 							</th>
 						</tr>
 					</thead>
@@ -165,7 +165,7 @@
 							</td>
 							<td class="border-b border-outline-gray-2 px-4 py-2 align-top text-sm">
 								<Badge
-									:label="row.success ? t('Success') : t('Failure')"
+									:label="row.success ? __('Success') : __('Failure')"
 									:theme="row.success ? 'green' : 'red'"
 								/>
 							</td>
@@ -198,8 +198,8 @@
 													? 'lucide-chevron-up'
 													: 'lucide-chevron-down'
 											"
-											:title="t('Toggle error details')"
-											:aria-label="t('Toggle error details')"
+											:title="__('Toggle error details')"
+											:aria-label="__('Toggle error details')"
 											:aria-expanded="expanded.has(index)"
 											@click="toggle(index)"
 										/>
@@ -245,7 +245,7 @@ import {
 	notStartedMessage,
 	progressPercent,
 } from "../importProgress";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import StatCards, { type Stat } from "./StatCards.vue";
 import type { DataImportLog } from "../types";
 import { emptyProgress, type UseDataImport } from "../useDataImport";
@@ -295,35 +295,38 @@ const skippedCount = computed(() => (doc.value.skipped_rows || []).length);
 const percent = computed(() => (finishing.value ? 100 : progressPercent(progress.value)));
 const rowProgress = computed(() =>
 	hasProgressCounts(progress.value)
-		? t("Importing row {0} of {1}", [progress.value.current, progress.value.total])
+		? __("Importing row {0} of {1}", [progress.value.current, progress.value.total])
 		: notStartedMessage(doc.value)
 );
 const statusLine = computed(() => {
 	const { current, total, eta } = progress.value;
-	if (finishing.value) return t("Finishing up...");
+	if (finishing.value) return __("Finishing up...");
 	if (!hasProgressCounts(progress.value))
 		return doc.value.status === "Pending"
-			? t("Preparing import...")
-			: t("Fetching latest status...");
-	return current >= total ? t("Finishing up...") : etaMessage(eta);
+			? __("Preparing import...")
+			: __("Fetching latest status...");
+	return current >= total ? __("Finishing up...") : etaMessage(eta);
 });
 
 const resultTitle = computed(
 	() =>
 		({
-			Success: t("Import complete"),
-			"Partial Success": t("Import partly complete"),
-			Error: t("Import failed"),
-			"Timed Out": t("Import timed out"),
-		}[doc.value.status as string] ?? t("Import"))
+			Success: __("Import complete"),
+			"Partial Success": __("Import partly complete"),
+			Error: __("Import failed"),
+			"Timed Out": __("Import timed out"),
+		}[doc.value.status as string] ?? __("Import"))
 );
 
 const runningIssues = computed(() => {
 	const issues = [];
 	if (progress.value.failed)
-		issues.push({ label: t("{0} failed", [progress.value.failed]), class: "text-ink-red-6" });
+		issues.push({
+			label: __("{0} failed", [progress.value.failed], "Data Import"),
+			class: "text-ink-red-6",
+		});
 	if (skippedCount.value)
-		issues.push({ label: t("{0} skipped", [skippedCount.value]), class: "text-ink-gray-6" });
+		issues.push({ label: __("{0} skipped", [skippedCount.value]), class: "text-ink-gray-6" });
 	return issues;
 });
 
@@ -377,26 +380,26 @@ const showExport = computed(
 );
 
 const resultStats = computed(() => {
-	const stats: Stat[] = [{ label: t("Total rows"), value: counts.value.totalRowsInFile }];
-	if (showInserted.value) stats.push({ label: t("Inserted"), value: counts.value.inserted });
-	if (showUpdated.value) stats.push({ label: t("Updated"), value: counts.value.updated });
+	const stats: Stat[] = [{ label: __("Total rows"), value: counts.value.totalRowsInFile }];
+	if (showInserted.value) stats.push({ label: __("Inserted"), value: counts.value.inserted });
+	if (showUpdated.value) stats.push({ label: __("Updated"), value: counts.value.updated });
 	stats.push({
-		label: t("Skipped"),
+		label: __("Skipped"),
 		value: skippedCount.value,
 		download: skippedCount.value
 			? {
-					title: t("Download Skipped Rows"),
+					title: __("Download Skipped Rows"),
 					onClick: () => download("download_skipped_rows"),
 			  }
 			: undefined,
 	});
 	stats.push({
-		label: t("Failed"),
+		label: __("Failed", [], "Data Import"),
 		value: counts.value.failedRows,
 		class: counts.value.failedRows ? "text-ink-red-6" : undefined,
 		download: counts.value.failedRows
 			? {
-					title: t("Download Failed Rows"),
+					title: __("Download Failed Rows"),
 					onClick: () => download("download_errored_template"),
 			  }
 			: undefined,
@@ -426,9 +429,9 @@ watch(
 const detailRows = computed(() => {
 	const date = (value?: string) => (value ? dateFormat(value) : "-");
 	return [
-		{ label: t("Started by"), user: doc.value.owner, date: date(doc.value.creation) },
+		{ label: __("Started by"), user: doc.value.owner, date: date(doc.value.creation) },
 		{
-			label: t("Last modified by"),
+			label: __("Last modified by"),
 			user: doc.value.modified_by,
 			date: date(doc.value.modified),
 		},
@@ -436,18 +439,18 @@ const detailRows = computed(() => {
 });
 
 const tabCount = (total: number) =>
-	total > LOG_LIMIT ? t("{0} of {1}", [LOG_LIMIT, total]) : String(total);
+	total > LOG_LIMIT ? __("{0} of {1}", [LOG_LIMIT, total]) : String(total);
 
 const filterOptions = computed(() => [
-	{ label: t("All ({0})", [tabCount(counts.value.totalRows)]), value: "all" },
-	{ label: t("Success ({0})", [tabCount(counts.value.successRows)]), value: "success" },
-	{ label: t("Failed ({0})", [tabCount(counts.value.failedRows)]), value: "failed" },
+	{ label: __("All ({0})", [tabCount(counts.value.totalRows)]), value: "all" },
+	{ label: __("Success ({0})", [tabCount(counts.value.successRows)]), value: "success" },
+	{ label: __("Failed ({0})", [tabCount(counts.value.failedRows)]), value: "failed" },
 ]);
 
 const emptyMessage = computed(() => {
-	if (logFilter.value === "failed") return t("No failed log entries");
-	if (logFilter.value === "success") return t("No successful log entries");
-	return t("No rows were imported");
+	if (logFilter.value === "failed") return __("No failed log entries");
+	if (logFilter.value === "success") return __("No successful log entries");
+	return __("No rows were imported");
 });
 
 const normalize = (value?: string) => (value || "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -464,7 +467,7 @@ function successText(log: DataImportLog): [string, string] {
 				: "Successfully inserted {0}";
 	else if (doc.value.import_type === "Update Existing Records")
 		message = "Successfully updated {0}";
-	const [before = "", after = ""] = t(message, [LINK_MARKER]).split(LINK_MARKER);
+	const [before = "", after = ""] = __(message, [LINK_MARKER]).split(LINK_MARKER);
 	return [before, after];
 }
 
@@ -473,7 +476,7 @@ const logRows = computed(() =>
 		const indexes = rowIndexes(log);
 		const base = {
 			success: !!log.success,
-			rowLabel: indexes.length ? indexes.join(", ") : t("-"),
+			rowLabel: indexes.length ? indexes.join(", ") : __("-"),
 			docname: log.docname || "",
 			successText: ["", ""] as [string, string],
 			summaryHtml: "",
@@ -490,7 +493,7 @@ const logRows = computed(() =>
 function failedLogRow(log: DataImportLog) {
 	const messages = parseJson<{ title?: string; message?: string }[]>(log.messages, []);
 	const first = messages[0];
-	const summary = normalize(first?.message || first?.title || t("Import failed"));
+	const summary = normalize(first?.message || first?.title || __("Import failed"));
 	const details = messages.filter((m) => {
 		const text = normalize(m.message || m.title);
 		return text && text !== summary;
@@ -501,7 +504,7 @@ function failedLogRow(log: DataImportLog) {
 	return {
 		// message is cleaned on the server; title is not, so it goes in as text
 		summaryHtml: first?.message || "",
-		summaryText: first?.title || t("Import failed"),
+		summaryText: first?.title || __("Import failed"),
 		details,
 		traceback,
 		expandable: !!(details.length || traceback),

@@ -33,7 +33,7 @@
 				/>
 				<button
 					type="button"
-					aria-label="Remove"
+					:aria-label="__('Remove')"
 					class="grid size-5 shrink-0 place-items-center rounded-4 text-ink-gray-5 opacity-0 hover:bg-surface-gray-3 group-hover:opacity-100"
 					@click.prevent="remove(index)"
 				>
@@ -45,11 +45,11 @@
 			v-else
 			class="rounded-6 border border-dashed border-outline-gray-2 p-4 text-center text-p-sm text-ink-gray-5"
 		>
-			No attachments yet.
+			{{ __("No attachments yet.") }}
 		</div>
 
 		<div>
-			<Button icon-left="lucide-paperclip" label="Attach" @click="openDialog" />
+			<Button icon-left="lucide-paperclip" :label="__('Attach')" @click="openDialog" />
 		</div>
 
 		<FileUploadDialog
@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 // Standalone "attachments list + Attach action" — a consumer of the upload
 // primitive that keeps an ARRAY of results (the multi case lives here, never as
 // a fieldtype). The Attach button opens the dialog in `multiple` mode; committed

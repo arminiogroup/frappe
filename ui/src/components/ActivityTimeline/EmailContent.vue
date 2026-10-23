@@ -2,7 +2,7 @@
 	<iframe
 		ref="iframeRef"
 		:srcdoc="htmlContent"
-		title="Email content"
+		:title="__('Email content')"
 		sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
 		referrerpolicy="no-referrer"
 		class="prose-f email-fade block h-10 w-full"
@@ -11,6 +11,7 @@
 </template>
 <!-- sandboxed + CSP: scripts and external resources can't load -->
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { computed, ref, watch } from "vue";
 import { applyCssToIframe, bottomFade, stripEmailColors, useDataTheme } from "./utils";
 

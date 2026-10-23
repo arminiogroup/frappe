@@ -196,9 +196,6 @@ class DataExporter:
 			]
 		)
 		self.writer.writerow([_("For updating, you can update only selective columns.")])
-		self.writer.writerow(
-			[_("You can only upload upto 5000 records in one go. (may be less in some cases)")]
-		)
 		if self.name_field == "parent":
 			self.writer.writerow([_('"Parent" signifies the parent table in which this row must be added')])
 			self.writer.writerow(

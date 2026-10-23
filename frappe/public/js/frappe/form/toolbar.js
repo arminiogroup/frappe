@@ -70,7 +70,14 @@ frappe.ui.form.Toolbar = class Toolbar {
 			title = this.frm.docname;
 		}
 
-		title = __(title);
+		const title_context =
+			!this.frm.is_new() &&
+			!this.frm.meta.title_field &&
+			title === String(this.frm.doc.name) &&
+			(frappe.boot?.translated_doctypes || []).includes(this.frm.doctype)
+				? this.frm.doctype
+				: null;
+		title = __(title, null, title_context);
 		this.page.set_title(title);
 		// Skip document title changes for forms embedded in dialogs
 		if (this.frm.meta.title_field && !this.frm.in_dialog) {

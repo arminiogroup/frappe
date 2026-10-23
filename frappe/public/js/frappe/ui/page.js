@@ -663,13 +663,13 @@ frappe.ui.Page = class Page {
 					submenu = [];
 					nested_groups.set(nested.group, submenu);
 					segments[segments.length - 1].push({
-						label: nested.group,
+						label: __(nested.group),
 						css_class: css_class || undefined,
 						submenu,
 					});
 				}
 				submenu.push({
-					label: nested.label,
+					label: __(nested.label),
 					disabled: a.classList.contains("disabled"),
 					onclick,
 				});
@@ -763,7 +763,7 @@ frappe.ui.Page = class Page {
 			).appendTo(this.inner_toolbar);
 			const $btn = frappe.ui
 				.button({
-					label: label,
+					label: __(label),
 					icon_right: "chevrons-up-down",
 					css_class: "ellipsis",
 				})
@@ -877,6 +877,8 @@ frappe.ui.Page = class Page {
 		let menu_item = this.add_menu_item(menu_item_label, _action, false, false, false);
 		if (group) {
 			menu_item.closest("li").data("menu_submenu", { group, label });
+		} else {
+			menu_item.find(".menu-item-label").html(__(label));
 		}
 		menu_item.parent().addClass("hidden-xl");
 		if (this.menu_btn_group.hasClass("hide")) {
@@ -891,7 +893,7 @@ frappe.ui.Page = class Page {
 				return $(
 					`<a class="dropdown-item" href="#" onclick="return false;" data-label="${encodeURIComponent(
 						label
-					)}">${label}</a>`
+					)}">${__(label)}</a>`
 				)
 					.on("click", _action)
 					.appendTo($group.find(".dropdown-menu"));

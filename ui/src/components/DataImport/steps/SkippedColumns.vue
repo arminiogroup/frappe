@@ -12,8 +12,8 @@
 						<span class="underline decoration-dotted underline-offset-2">
 							{{
 								columns.length === 1
-									? t("1 column skipped")
-									: t("{0} columns skipped", [columns.length])
+									? __("1 column skipped")
+									: __("{0} columns skipped", [columns.length])
 							}}
 						</span>
 					</button>
@@ -22,7 +22,7 @@
 			<div class="flex max-w-sm flex-col gap-2 p-2">
 				<p class="text-sm text-ink-gray-6">
 					{{
-						t(
+						__(
 							"These columns won't be imported. Map them in the Map columns step to import them."
 						)
 					}}
@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { Badge, HoverCard } from "frappe-ui";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 
 defineProps<{ columns: { col: number; label: string }[] }>();
 </script>

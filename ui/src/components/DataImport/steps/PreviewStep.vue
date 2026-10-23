@@ -2,7 +2,7 @@
 	<Alert
 		v-if="previewError && !previewLoading"
 		theme="red"
-		:title="t('Could not load import file')"
+		:title="__('Could not load import file')"
 		:description="previewError"
 	/>
 	<div
@@ -10,7 +10,7 @@
 		class="flex w-full flex-col gap-2"
 		role="status"
 		aria-busy="true"
-		:aria-label="t('Loading import preview...')"
+		:aria-label="__('Loading import preview...')"
 	>
 		<div class="flex items-center justify-between gap-2">
 			<Skeleton class="h-[30px] w-32 rounded" />
@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { Alert, Skeleton, Tabs } from "frappe-ui";
 import { computed, ref } from "vue";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import type { UseDataImport } from "../useDataImport";
 import PreviewTable from "./PreviewTable.vue";
 import TreePreview from "./TreePreview.vue";
@@ -53,8 +53,8 @@ const { preview, previewReady, previewLoading, previewError, saving } = props.da
 
 const previewTab = ref("tree");
 const previewTabs = computed(() => [
-	{ value: "tree", label: t("Tree"), iconLeft: "lucide-folder-tree" },
-	{ value: "table", label: t("Table"), iconLeft: "lucide-table-2" },
+	{ value: "tree", label: __("Tree"), iconLeft: "lucide-folder-tree" },
+	{ value: "table", label: __("Table"), iconLeft: "lucide-table-2" },
 ]);
 // A click on a tree node marks its row in the table, as Desk does.
 const highlightedRow = ref<number | null>(null);

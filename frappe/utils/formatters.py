@@ -56,6 +56,7 @@ def format_value(value, df=None, doc=None, currency=None, translated=False, form
 		# Convert dict to object if necessary
 		df = frappe._dict(df)
 
+	untranslated_value = value
 	if value is None:
 		value = ""
 	elif translated:
@@ -143,6 +144,22 @@ def format_value(value, df=None, doc=None, currency=None, translated=False, form
 
 	elif df.get("fieldtype") == "Select":
 		if isinstance(value, str):
+			if isinstance(untranslated_value, str):
+				return _translate_select_option(untranslated_value, df)
 			return frappe._(value, context=df.parent or "")
 
 	return value
+
+
+def _translate_select_option(value, df):
+	from frappe.translate import get_all_translations
+
+	fallback = frappe._(value, context=df.parent or "")
+	if not (df.parent and df.fieldname):
+		return fallback
+
+	translations = get_all_translations(frappe.local.lang)
+	for context in (f"{df.parent}.{df.fieldname}", df.parent, f"Select Option: {df.fieldname}"):
+		if translated := translations.get(f"{value.strip()}:{context}"):
+			return translated
+	return fallback

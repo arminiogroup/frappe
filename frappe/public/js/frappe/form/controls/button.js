@@ -24,7 +24,7 @@ frappe.ui.form.ControlButton = class ControlButton extends frappe.ui.form.Contro
 		this.$input = $(
 			`<button type="button"
 				class="btn ${frappe.utils.escape_html(btn_size)} ${frappe.utils.escape_html(btn_type)}"
-				title="${this.df.title || frappe.utils.escape_html(this.df.label)}"
+				title="${this.df.title || frappe.utils.escape_html(__(this.df.label, null, this.df.parent))}"
 			>`
 		)
 			.prependTo(me.input_area)
@@ -79,10 +79,14 @@ frappe.ui.form.ControlButton = class ControlButton extends frappe.ui.form.Contro
 		if (label) {
 			this.df.label = label;
 		}
-		label =
-			(this.df.icon ? frappe.utils.icon(this.df.icon) : "") +
-			__(this.df.label, null, this.df.parent);
+		const translated_label = __(this.df.label, null, this.df.parent);
+		label = (this.df.icon ? frappe.utils.icon(this.df.icon) : "") + translated_label;
 		$(this.label_span).html("&nbsp;");
-		this.$input && this.$input.html(label);
+		if (this.$input) {
+			this.$input.html(label);
+			if (!this.df.title) {
+				this.$input.attr("title", String(translated_label ?? ""));
+			}
+		}
 	}
 };

@@ -985,7 +985,7 @@ def validate_item_route(item) -> None:
 	if item.get("link_type") != "Page":
 		frappe.throw(
 			_("Only a Page item has a route inside it. {0} links a {1}.").format(
-				frappe.bold(item.get("label") or item.get("link_to")), item.get("link_type")
+				frappe.bold(item.get("label") or item.get("link_to")), _(item.get("link_type"))
 			),
 			title=_("Route Not Allowed"),
 		)

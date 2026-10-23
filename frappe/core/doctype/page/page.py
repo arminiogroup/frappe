@@ -107,9 +107,7 @@ class Page(Document):
 		page_name = frappe.scrub(self.name)
 		if not self.is_new() and os.path.exists(os.path.join(self.get_folder_path(), f"{page_name}.js")):
 			frappe.msgprint(
-				_("{0}.js will no longer run. A Frappe UI page is drawn by its island.").format(
-					f"{page_name}.js"
-				),
+				_("{0}.js will no longer run. A Frappe UI page is drawn by its island.").format(page_name),
 				indicator="orange",
 			)
 

@@ -276,7 +276,7 @@ class Workspace(DeskViews):
 			for chart in charts:
 				if frappe.has_permission("Dashboard Chart", doc=chart.chart_name):
 					# Translate label
-					chart.label = _(chart.label) if chart.label else _(chart.chart_name)
+					chart.label = _(chart.label or chart.chart_name, context="Dashboard Chart")
 					all_charts.append(chart)
 
 		return all_charts

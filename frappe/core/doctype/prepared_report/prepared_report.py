@@ -17,7 +17,7 @@ from frappe.desk.form.load import get_attachments
 from frappe.desk.query_report import generate_report_result, get_reference_report, get_user_facing_error
 from frappe.model.document import Document
 from frappe.monitor import add_data_to_monitor
-from frappe.utils import add_to_date, get_url_to_report_with_filters, now
+from frappe.utils import add_to_date, escape_html, get_url_to_report_with_filters, now
 from frappe.utils.background_jobs import enqueue, get_redis_conn
 
 # If prepared report runs for longer than this time it's automatically considered as failed
@@ -171,10 +171,15 @@ def notify_report_status(instance: PreparedReport):
 	if instance.status not in ("Completed", "Error"):
 		return
 
+	report_label = instance.report_name
+	is_standard = frappe.get_cached_value("Report", instance.report_name, "is_standard") == "Yes"
+	if is_standard:
+		report_label = _(report_label)
+
 	if instance.status == "Completed":
-		subject = _("Report {0} is ready.").format(frappe.bold(instance.report_name))
+		subject = _("Report {0} is ready.").format(frappe.bold(report_label))
 	else:
-		subject = _("Report {0} failed to generate.").format(frappe.bold(instance.report_name))
+		subject = _("Report {0} failed to generate.").format(frappe.bold(report_label))
 		if error := get_user_facing_error(instance.error_message):
 			subject = _("{0} Error: {1}", context="Prepared Report Notification").format(subject, error)
 
@@ -193,7 +198,12 @@ def notify_report_status(instance: PreparedReport):
 
 	frappe.publish_realtime(
 		"report_processed",
-		{"report_name": instance.report_name, "name": instance.name},
+		{
+			"report_name": instance.report_name,
+			"name": instance.name,
+			"status": instance.status,
+			"is_standard": is_standard,
+		},
 		user=instance.owner,
 		after_commit=True,
 	)
@@ -474,8 +484,10 @@ def convert_json_to_csv(prepared_report_name):
 	frappe.get_doc(
 		{
 			"doctype": "Notification Log",
-			"subject": "Your CSV file is ready for download",
-			"email_content": f'Click <a href="{_file.file_url}" target="_blank">here</a> to download the file.',
+			"subject": _("Your CSV file is ready for download"),
+			"email_content": _('Click <a href="{0}" target="_blank">here</a> to download the file.').format(
+				escape_html(_file.file_url)
+			),
 			"for_user": frappe.session.user,
 			"document_type": "File",
 			"document_name": _file.name,

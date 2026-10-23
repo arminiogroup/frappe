@@ -17,7 +17,7 @@
 				</template>
 			</Alert>
 			<div v-if="running" class="flex flex-col gap-2">
-				<Progress size="md" :value="percent" :label="t('Import Progress')" />
+				<Progress size="md" :value="percent" :label="__('Import Progress')" />
 				<p class="text-sm text-ink-gray-6">{{ message }}</p>
 			</div>
 		</div>
@@ -29,7 +29,7 @@ import { Alert, Progress } from "frappe-ui";
 import { computed } from "vue";
 import { cint } from "./dataImport";
 import { progressMessage, progressPercent } from "./importProgress";
-import { t } from "./translate";
+import { t as __ } from "./translate";
 import { emptyProgress, type UseDataImport } from "./useDataImport";
 
 const props = defineProps<{ dataImport: UseDataImport }>();
@@ -49,11 +49,11 @@ const headline = computed(() => {
 	const lines: string[] = [];
 	if (importType === "Update Existing Records")
 		lines.push(
-			t("Successfully updated {0} out of {1} records.", [cint(status.success), total])
+			__("Successfully updated {0} out of {1} records.", [cint(status.success), total])
 		);
 	else if (importType === "Insert or Update Records")
 		lines.push(
-			t("Successfully inserted {0} and updated {1} out of {2} records.", [
+			__("Successfully inserted {0} and updated {1} out of {2} records.", [
 				cint(status.inserted),
 				cint(status.updated),
 				total,
@@ -61,18 +61,18 @@ const headline = computed(() => {
 		);
 	else
 		lines.push(
-			t("Successfully imported {0} out of {1} records.", [cint(status.success), total])
+			__("Successfully imported {0} out of {1} records.", [cint(status.success), total])
 		);
 
 	if (cint(status.failed) > 0)
 		lines.push(
-			t("Use 'Download Failed Rows' on the Failed metric, fix the errors and import again.")
+			__("Use 'Download Failed Rows' on the Failed metric, fix the errors and import again.")
 		);
 	if ((doc.value.skipped_rows || []).length)
 		lines.push(
-			t("Use 'Download Skipped Rows' on the Skipped metric to export the skipped rows.")
+			__("Use 'Download Skipped Rows' on the Skipped metric to export the skipped rows.")
 		);
-	if (status.status === "Timed Out") lines.push(t("Import timed out, please re-try."));
+	if (status.status === "Timed Out") lines.push(__("Import timed out, please re-try."));
 	return lines;
 });
 </script>

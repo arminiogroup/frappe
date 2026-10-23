@@ -24,7 +24,7 @@
 				:options="[
 					{ value: 'styled', label: __('Styled') },
 					{ value: 'plain', label: __('Plain') },
-					{ value: 'none', label: __('None') },
+					{ value: 'none', label: __('None', null, 'Print Table Header') },
 				]"
 				@update:model-value="(v) => (selected_field.table_header = v)"
 			/>
@@ -322,7 +322,7 @@ const table_look_opts = [
 	{ value: "grid", label: __("Grid") },
 	{ value: "rows", label: __("Rows") },
 	{ value: "striped", label: __("Striped") },
-	{ value: "clean", label: __("None") },
+	{ value: "clean", label: __("None", null, "Print Table Style") },
 ];
 
 let table_look = computed(

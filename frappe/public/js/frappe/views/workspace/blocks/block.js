@@ -6,9 +6,11 @@ export default class Block {
 	}
 
 	make(block, block_name, widget_type = block) {
+		const context = block === "chart" ? "Dashboard Chart" : null;
 		let block_data = this.config.page_data[block + "s"].items.find((obj) => {
 			return (
-				frappe.utils.unescape_html(obj.label) == frappe.utils.unescape_html(__(block_name))
+				frappe.utils.unescape_html(obj.label) ==
+				frappe.utils.unescape_html(__(block_name, null, context))
 			);
 		});
 		if (!block_data) return false;

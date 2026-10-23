@@ -281,6 +281,34 @@
 	}
 }
 
+.ql-snow .ql-tooltip[data-label]::before {
+	content: attr(data-label);
+}
+
+.ql-snow .ql-tooltip[data-mode="link"][data-label-link]::before {
+	content: attr(data-label-link);
+}
+
+.ql-snow .ql-tooltip[data-mode="video"][data-label-video]::before {
+	content: attr(data-label-video);
+}
+
+.ql-snow .ql-tooltip[data-mode="formula"][data-label-formula]::before {
+	content: attr(data-label-formula);
+}
+
+.ql-snow .ql-tooltip a.ql-action[data-label-edit]::after {
+	content: attr(data-label-edit);
+}
+
+.ql-snow .ql-tooltip.ql-editing a.ql-action[data-label-save]::after {
+	content: attr(data-label-save);
+}
+
+.ql-snow .ql-tooltip a.ql-remove[data-label]::before {
+	content: attr(data-label);
+}
+
 .print-format {
 	.ql-snow .ql-editor {
 		height: auto;

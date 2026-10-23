@@ -134,7 +134,7 @@ const spacing_props = [
 	{ key: "margin", label: __("Margin") },
 ];
 const grid_opts = [
-	{ value: "all", label: __("Both") },
+	{ value: "all", label: __("Both", null, "Print Grid Lines") },
 	{ value: "rows", label: __("Rows") },
 	{ value: "columns", label: __("Columns") },
 ];

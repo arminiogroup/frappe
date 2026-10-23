@@ -177,7 +177,11 @@ class DatabaseQuery:
 		if limit:
 			limit_page_length = limit
 		if as_list and not isinstance(self.fields, (Sequence | str)) and len(self.fields) > 1:
-			frappe.throw(_("Fields must be a list or tuple when as_list is enabled"))
+			frappe.throw(
+				_(
+					"When as_list is enabled and multiple fields are requested, fields must be an ordered sequence, such as a list, tuple, or string."
+				)
+			)
 
 		self.filters: Filters
 		self.or_filters: Filters

@@ -110,7 +110,7 @@
    "depends_on": "eval:doc.link_type == \"Report\"",
    "fieldname": "is_query_report",
    "fieldtype": "Check",
-   "label": "Is Query Report"
+   "label": "Query, Script, or Custom Report"
   },
   {
    "depends_on": "eval:doc.type == \"Card Break\"",
@@ -134,10 +134,9 @@
    "read_only": 1
   }
  ],
- "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-10 15:03:41.246812",
+ "modified": "2026-10-21 04:55:27.315010",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Workspace Link",

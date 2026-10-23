@@ -40,8 +40,8 @@
 			</Editor>
 		</div>
 		<div v-if="editable" class="mt-2 flex justify-end gap-2">
-			<Button variant="outline" label="Discard" @click="emit('discard')" />
-			<Button variant="solid" label="Save" @click="emit('save', editedContent)" />
+			<Button variant="outline" :label="__('Discard')" @click="emit('discard')" />
+			<Button variant="solid" :label="__('Save')" @click="emit('save', editedContent)" />
 		</div>
 		<slot v-else name="footer" :comment="comment">
 			<div v-if="comment.data.attachments?.length" class="mt-2 flex flex-wrap gap-2">
@@ -57,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { Button } from "frappe-ui";
 import { CommentKit, Editor, EditorContent } from "frappe-ui/editor";
 import { nextTick, ref, watch } from "vue";

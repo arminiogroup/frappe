@@ -45,7 +45,7 @@ export default class ChartWidget extends Widget {
 
 	set_chart_title() {
 		const max_chars = this.widget.width() < 600 ? 40 : 60;
-		this.set_title(max_chars);
+		this.set_title(max_chars, "Dashboard Chart");
 	}
 
 	set_body() {
@@ -298,7 +298,8 @@ export default class ChartWidget extends Widget {
 					},
 				},
 				{
-					label: __(this.chart_settings.timespan) || __(this.chart_doc.timespan),
+					label: this.chart_settings.timespan || this.chart_doc.timespan,
+					context: "Dashboard Chart",
 					options: [
 						"Select Date Range",
 						"Last Year",
@@ -574,7 +575,9 @@ export default class ChartWidget extends Widget {
 	setup_filter_dialog(fields) {
 		let me = this;
 		let dialog = new frappe.ui.Dialog({
-			title: __("Set Filters for {0}", [__(this.chart_doc.chart_name)]),
+			title: __("Set Filters for {0}", [
+				__(this.chart_doc.chart_name, null, "Dashboard Chart"),
+			]),
 			fields: fields,
 			primary_action: function (values) {
 				this.hide();
@@ -979,7 +982,7 @@ export default class ChartWidget extends Widget {
 					</ul>
 					<div class="legend-label">
 						<div style="margin-bottom: 45px">${__("Less")}</div>
-						<div>${__("More")}</div>
+						<div>${__("More", null, "Heatmap legend")}</div>
 					</div>
 				</div>
 				`);

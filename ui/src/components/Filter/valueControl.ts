@@ -1,3 +1,4 @@
+import { translate as __ } from "../../utils/translate";
 import { isOptionField } from "./operators";
 import type { Filter, FilterField } from "./types";
 import type { FieldMeta } from "../Fields/types";
@@ -38,33 +39,33 @@ export interface ValueControlSpec {
   props: Record<string, unknown>;
 }
 
-const SET_OPTIONS = [
-  { label: "Set", value: "set" },
-  { label: "Not Set", value: "not set" },
-];
+function setOptions() {
+  return [
+    { label: __("Set", [], "Filter Value"), value: "set" },
+    { label: __("Not Set", [], "Filter Value"), value: "not set" },
+  ];
+}
 
-const TIMESPAN_OPTIONS = [
-  "last week",
-  "last month",
-  "last quarter",
-  "last 6 months",
-  "last year",
-  "yesterday",
-  "today",
-  "tomorrow",
-  "this week",
-  "this month",
-  "this quarter",
-  "this year",
-  "next week",
-  "next month",
-  "next quarter",
-  "next 6 months",
-  "next year",
-].map((v) => ({ label: titleCase(v), value: v }));
-
-function titleCase(s: string): string {
-  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+function timespanOptions() {
+  return [
+    { label: __("Last Week"), value: "last week" },
+    { label: __("Last Month"), value: "last month" },
+    { label: __("Last Quarter"), value: "last quarter" },
+    { label: __("Last 6 Months"), value: "last 6 months" },
+    { label: __("Last Year"), value: "last year" },
+    { label: __("Yesterday"), value: "yesterday" },
+    { label: __("Today"), value: "today" },
+    { label: __("Tomorrow"), value: "tomorrow" },
+    { label: __("This Week"), value: "this week" },
+    { label: __("This Month"), value: "this month" },
+    { label: __("This Quarter"), value: "this quarter" },
+    { label: __("This Year"), value: "this year" },
+    { label: __("Next Week"), value: "next week" },
+    { label: __("Next Month"), value: "next month" },
+    { label: __("Next Quarter"), value: "next quarter" },
+    { label: __("Next 6 Months"), value: "next 6 months" },
+    { label: __("Next Year"), value: "next year" },
+  ];
 }
 
 /** Field meta passed to a `Fields` value input — no label/description so the
@@ -77,6 +78,8 @@ function bareField(
     fieldname: field.fieldname,
     fieldtype: field.fieldtype,
     options: field.options,
+    parent: field.parent,
+    context: field.context,
     ...overrides,
   };
 }
@@ -93,12 +96,12 @@ export function valueControl(f: Filter): ValueControlSpec {
   const ph = placeholder(f);
 
   if (operator === "is" || operator === "is not") {
-    return { control: "set", props: { options: SET_OPTIONS, placeholder: ph } };
+    return { control: "set", props: { options: setOptions(), placeholder: ph } };
   }
   if (operator === "timespan") {
     return {
       control: "timespan",
-      props: { options: TIMESPAN_OPTIONS, placeholder: ph },
+      props: { options: timespanOptions(), placeholder: ph },
     };
   }
   // `in` / `not in` over an option field picks the field's values rather than
@@ -142,7 +145,7 @@ export function valueControl(f: Filter): ValueControlSpec {
     };
   }
   if (DATE_TYPES.includes(fieldtype) && operator === "between") {
-    return { control: "dateRange", props: { iconLeft: "" } };
+    return { control: "dateRange", props: { iconLeft: "", placeholder: ph } };
   }
   if (DURATION_TYPES.includes(fieldtype)) {
     return {
@@ -168,19 +171,20 @@ export function valueControl(f: Filter): ValueControlSpec {
  *  `%` itself, so prompting for the wildcards would mislead. */
 export function placeholder(f: Filter): string {
   const fieldtype = f.field?.fieldtype ?? "Data";
-  if (f.operator === "between") return "01/01/2022 to 01/31/2022";
+  if (f.operator === "between") return __("Select a date range");
   if (f.operator === "in" || f.operator === "not in")
     return NUMBER_TYPES.includes(fieldtype)
       ? "100, 200, 300"
-      : "John, Jane, Doe";
+      : __("Enter comma-separated values");
   if (f.operator === "like" || f.operator === "not like")
-    return NUMBER_TYPES.includes(fieldtype) ? "100" : "John";
-  if (f.operator === "is" || f.operator === "is not") return "Set";
-  if (f.operator === "timespan") return "Last Week";
+    return NUMBER_TYPES.includes(fieldtype) ? "100" : __("Enter a value");
+  if (f.operator === "is" || f.operator === "is not") return __("Set", [], "Filter Value");
+  if (f.operator === "timespan") return __("Last Week");
   if (NUMBER_TYPES.includes(fieldtype)) return "1000";
-  if (DATE_TYPES.includes(fieldtype)) return "01/01/2022";
-  if (CHECK_TYPES.includes(fieldtype)) return "Yes";
-  if (LINK_TYPES.includes(fieldtype)) return "Select a Value";
-  if (SELECT_TYPES.includes(fieldtype)) return "Select an Option";
-  return "John Doe";
+  if (fieldtype === "Datetime") return __("Select a date and time");
+  if (fieldtype === "Date") return __("Select a date");
+  if (CHECK_TYPES.includes(fieldtype)) return __("Yes");
+  if (LINK_TYPES.includes(fieldtype)) return __("Select a Value");
+  if (SELECT_TYPES.includes(fieldtype)) return __("Select an Option");
+  return __("Enter a value");
 }

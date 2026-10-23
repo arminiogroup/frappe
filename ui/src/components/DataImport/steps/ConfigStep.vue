@@ -1,13 +1,13 @@
 <template>
 	<div class="flex flex-col gap-4">
 		<section class="flex flex-col gap-4">
-			<h2 class="text-base-semibold text-ink-gray-8">{{ t("Import settings") }}</h2>
+			<h2 class="text-base-semibold text-ink-gray-8">{{ __("Import settings") }}</h2>
 			<Alert
 				v-if="pendingCount"
 				theme="blue"
 				:title="pendingMessage"
 				:primaryAction="{
-					label: t('Review pending imports'),
+					label: __('Review pending imports'),
 					variant: 'outline',
 					size: 'xs',
 					iconRight: 'lucide-arrow-right',
@@ -20,30 +20,32 @@
 						v-model="doc.reference_doctype"
 						doctype="DocType"
 						:filters="{ allow_import: 1 }"
-						:label="t('Document Type')"
+						:label="__('Document Type')"
 						required
 						:disabled="!isNew"
 						:error="
 							showErrors && !doc.reference_doctype
-								? t('Select a Document Type')
+								? __('Select a Document Type')
 								: undefined
 						"
 					/>
 					<Select
 						v-model="doc.import_type"
-						:label="t('Import Type')"
+						:label="__('Import Type')"
 						:options="importTypeOptions"
 						required
 						:disabled="!isNew"
 						:error="
-							showErrors && !doc.import_type ? t('Select an Import Type') : undefined
+							showErrors && !doc.import_type
+								? __('Select an Import Type')
+								: undefined
 						"
 					/>
 				</div>
 				<div class="flex min-w-0 flex-col gap-4">
 					<Checkbox
 						data-fieldname="mute_emails"
-						:label="t(`Don't Send Emails`)"
+						:label="__(`Don't Send Emails`)"
 						:disabled="!isNew"
 						:modelValue="!!doc.mute_emails"
 						@update:modelValue="(value) => setCheck('mute_emails', value)"
@@ -51,7 +53,7 @@
 					<Checkbox
 						v-if="isSubmittable"
 						data-fieldname="submit_after_import"
-						:label="t('Submit After Import')"
+						:label="__('Submit After Import')"
 						:disabled="!isNew"
 						:modelValue="!!doc.submit_after_import"
 						@update:modelValue="(value) => setCheck('submit_after_import', value)"
@@ -59,7 +61,7 @@
 					<template v-if="showCsvOptions">
 						<Checkbox
 							data-fieldname="custom_delimiters"
-							:label="t('Custom Delimiters')"
+							:label="__('Custom Delimiters')"
 							:disabled="importFinished"
 							:modelValue="!!doc.custom_delimiters"
 							@update:modelValue="(value) => setCheck('custom_delimiters', value)"
@@ -68,9 +70,9 @@
 							v-if="doc.custom_delimiters"
 							data-fieldname="delimiter_options"
 							:modelValue="doc.delimiter_options || ''"
-							:label="t('Delimiter Options')"
+							:label="__('Delimiter Options')"
 							:description="
-								t(
+								__(
 									'If your CSV uses a different delimiter, add that character here, ensuring no spaces or additional characters are included.'
 								)
 							"
@@ -79,9 +81,9 @@
 						/>
 						<Checkbox
 							data-fieldname="use_csv_sniffer"
-							:label="t('Detect CSV type')"
+							:label="__('Detect CSV type')"
 							:description="
-								t(
+								__(
 									`Use if the default settings don't seem to detect your data correctly`
 								)
 							"
@@ -96,11 +98,11 @@
 
 		<section class="flex flex-col gap-4 border-t border-outline-gray-2 pt-4">
 			<div class="flex items-center justify-between gap-4">
-				<h2 class="text-base-semibold text-ink-gray-8">{{ t("Upload file") }}</h2>
+				<h2 class="text-base-semibold text-ink-gray-8">{{ __("Upload file") }}</h2>
 				<Button
 					v-if="hasSettings"
 					variant="outline"
-					:label="t('Download Template')"
+					:label="__('Download Template')"
 					@click="showTemplate = true"
 				/>
 			</div>
@@ -109,12 +111,12 @@
 				<TabList>
 					<TabTrigger
 						value="file_upload"
-						:label="t('File upload')"
+						:label="__('File upload')"
 						icon-left="lucide-upload"
 					/>
 					<TabTrigger
 						value="google_sheet"
-						:label="t('Google Sheet')"
+						:label="__('Google Sheet')"
 						icon-left="lucide-link"
 					/>
 				</TabList>
@@ -148,7 +150,7 @@
 					<Button
 						v-if="!importFinished"
 						variant="outline"
-						:label="t('Clear')"
+						:label="__('Clear')"
 						@click="confirmingClear = true"
 					/>
 				</div>
@@ -186,7 +188,7 @@
 					>
 						<template #hint>
 							<span class="shrink-0 text-base text-ink-gray-5">
-								{{ `${t("Uploading")} ${uploader.state.progress}%` }}
+								{{ `${__("Uploading")} ${uploader.state.progress}%` }}
 							</span>
 						</template>
 					</Progress>
@@ -201,17 +203,17 @@
 						>
 							{{
 								hasSettings
-									? t("Drag a CSV or Excel file here, or click to browse")
-									: t("Select a Document Type to upload a file")
+									? __("Drag a CSV or Excel file here, or click to browse")
+									: __("Select a Document Type to upload a file")
 							}}
 						</div>
 						<div v-if="hasSettings && maxFileSizeMb" class="text-sm text-ink-gray-5">
-							{{ t(".csv, .xlsx up to {0} MB", [maxFileSizeMb]) }}
+							{{ __(".csv, .xlsx up to {0} MB", [maxFileSizeMb]) }}
 						</div>
 					</template>
 				</div>
 				<p v-if="fileMissing" data-slot="file-error" class="text-p-sm text-ink-red-5">
-					{{ t("Attach a CSV or Excel file to continue") }}
+					{{ __("Attach a CSV or Excel file to continue") }}
 				</p>
 			</template>
 
@@ -237,7 +239,7 @@
 						v-if="!importFinished"
 						size="xs"
 						variant="outline"
-						:label="t('Clear')"
+						:label="__('Clear')"
 						@click="clearGoogleSheet"
 					/>
 				</div>
@@ -245,16 +247,16 @@
 					v-else
 					data-fieldname="google_sheets_url"
 					:modelValue="doc.google_sheets_url || ''"
-					:label="t('Import from Google Sheets')"
-					:description="t('Must be a publicly accessible Google Sheets URL')"
+					:label="__('Import from Google Sheets')"
+					:description="__('Must be a publicly accessible Google Sheets URL')"
 					:disabled="uploadLocked"
-					:error="fileMissing ? t('Enter a Google Sheets URL to continue') : undefined"
+					:error="fileMissing ? __('Enter a Google Sheets URL to continue') : undefined"
 					@update:modelValue="(value) => (doc.google_sheets_url = String(value))"
 				/>
 				<Button
 					v-if="doc.google_sheets_url && !dirty"
 					class="self-start"
-					:label="t('Refresh Google Sheet')"
+					:label="__('Refresh Google Sheet')"
 					@click="dataImport.refreshGoogleSheet()"
 				/>
 			</div>
@@ -270,11 +272,11 @@
 		/>
 		<Dialog
 			v-model:open="confirmingClear"
-			:title="t('Confirm')"
-			:message="t('Are you sure you want to delete the attachment?')"
+			:title="__('Confirm')"
+			:message="__('Are you sure you want to delete the attachment?')"
 			:actions="[
-				{ label: t('Yes'), variant: 'solid', onClick: clearFile },
-				{ label: t('No'), onClick: ({ close }) => close() },
+				{ label: __('Yes'), variant: 'solid', onClick: clearFile },
+				{ label: __('No'), onClick: ({ close }) => close() },
 			]"
 		/>
 	</div>
@@ -300,7 +302,7 @@ import {
 import { computed, ref, watch } from "vue";
 import { Link } from "../../Link";
 import { isImportComplete } from "../dataImport";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import type { DataImportDoc } from "../types";
 import type { UseDataImport } from "../useDataImport";
 import TemplateModal from "./TemplateModal.vue";
@@ -327,7 +329,7 @@ const uploadingFile = ref("");
 
 const importTypeOptions = computed(() =>
 	(["Insert New Records", "Update Existing Records", "Insert or Update Records"] as const).map(
-		(value) => ({ label: t(value), value })
+		(value) => ({ label: __(value), value })
 	)
 );
 
@@ -374,12 +376,12 @@ function setCheck(field: CheckField, value: boolean | 0 | 1 | undefined) {
 
 const pendingMessage = computed(() =>
 	pendingCount.value === 1
-		? t("You have 1 pending {0} import with a file attached.", [
-				t(doc.value.reference_doctype),
+		? __("You have 1 pending {0} import with a file attached.", [
+				__(doc.value.reference_doctype),
 		  ])
-		: t("You have {0} pending {1} imports with files attached.", [
+		: __("You have {0} pending {1} imports with files attached.", [
 				pendingCount.value,
-				t(doc.value.reference_doctype),
+				__(doc.value.reference_doctype),
 		  ])
 );
 
@@ -406,13 +408,13 @@ const fileName = computed(() => {
 
 const fileMeta = computed(() => {
 	const ext = (fileName.value.split(".").pop() || "").toLowerCase();
-	const typeLabel = ext ? ext.toUpperCase() : t("File");
+	const typeLabel = ext ? ext.toUpperCase() : __("File");
 	const count =
 		doc.value.payload_count ||
 		preview.value?.total_number_of_rows ||
 		preview.value?.data?.length;
 	if (!count) return typeLabel;
-	return `${typeLabel} · ${count === 1 ? t("1 row") : t("{0} rows", [count])}`;
+	return `${typeLabel} · ${count === 1 ? __("1 row") : __("{0} rows", [count])}`;
 });
 
 const maxFileSizeMb = computed(() => {
@@ -428,7 +430,7 @@ function isAllowedType(file: File) {
 async function uploadFile(file: File | undefined) {
 	if (!file) return;
 	if (!isAllowedType(file)) {
-		toast.warning(t('File "{0}" was skipped because of invalid file type', [file.name]));
+		toast.warning(__('File "{0}" was skipped because of invalid file type', [file.name]));
 		return;
 	}
 	const attachTo: Partial<Record<"doctype" | "docname" | "fieldname", string>> = isNew.value

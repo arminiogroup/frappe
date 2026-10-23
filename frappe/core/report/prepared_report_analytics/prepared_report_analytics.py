@@ -42,7 +42,7 @@ def get_columns(filters) -> list[dict]:
 			"width": 250,
 		},
 		{
-			"label": _("Start"),
+			"label": _("Start", context="Time"),
 			"fieldname": "creation",
 			"fieldtype": "DateTime",
 			"width": 250,

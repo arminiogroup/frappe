@@ -1,3 +1,5 @@
+import { translate as __ } from "../../utils/translate";
+import { translateDocFieldText } from "../../utils/translateDocField";
 import type { RawMetaField } from "../FormLayout/types";
 import type { FilterField, FilterFieldDeclaration } from "./types";
 
@@ -23,35 +25,14 @@ const FILTERABLE_FIELDTYPES = new Set([
   "Datetime",
 ]);
 
-/** Standard fields every doctype can be filtered on, prepended ahead of the
- *  meta fields. Mirrors the `standard_fields` list in `get_filterable_fields`. */
-const STANDARD_FIELDS: ReadonlyArray<
-  Pick<RawMetaField, "fieldname" | "fieldtype" | "label" | "options">
-> = [
-  { fieldname: "name", fieldtype: "Link", label: "Name", options: undefined },
-  {
-    fieldname: "owner",
-    fieldtype: "Link",
-    label: "Created By",
-    options: "User",
-  },
-  {
-    fieldname: "modified_by",
-    fieldtype: "Link",
-    label: "Last Updated By",
-    options: "User",
-  },
-  { fieldname: "_user_tags", fieldtype: "Data", label: "Tags" },
-  { fieldname: "_liked_by", fieldtype: "Data", label: "Like" },
-  { fieldname: "_assign", fieldtype: "Text", label: "Assigned To" },
-  { fieldname: "creation", fieldtype: "Datetime", label: "Created On" },
-  { fieldname: "modified", fieldtype: "Datetime", label: "Last Updated On" },
-];
-
 const toFilterField = (
-  f: Pick<RawMetaField, "fieldname" | "fieldtype" | "label" | "options">
+  f: Pick<
+    RawMetaField,
+    "fieldname" | "fieldtype" | "label" | "options" | "parent" | "context"
+  >
 ): FilterField => ({
-  label: f.label ?? f.fieldname,
+  label: translateDocFieldText(f, f.label) ?? f.fieldname,
+  ...(f.parent ? { parent: f.parent, context: f.context } : {}),
   value: f.fieldname,
   fieldname: f.fieldname,
   fieldtype: f.fieldtype,
@@ -73,6 +54,29 @@ export function getFilterableFields(
   fields: RawMetaField[],
   doctype: string
 ): FilterField[] {
+  const STANDARD_FIELDS: ReadonlyArray<
+    Pick<RawMetaField, "fieldname" | "fieldtype" | "label" | "options">
+  > = [
+    { fieldname: "name", fieldtype: "Link", label: __("Name"), options: undefined },
+    {
+      fieldname: "owner",
+      fieldtype: "Link",
+      label: __("Created By"),
+      options: "User",
+    },
+    {
+      fieldname: "modified_by",
+      fieldtype: "Link",
+      label: __("Last Updated By"),
+      options: "User",
+    },
+    { fieldname: "_user_tags", fieldtype: "Data", label: __("Tags") },
+    { fieldname: "_liked_by", fieldtype: "Data", label: __("Liked By") },
+    { fieldname: "_assign", fieldtype: "Text", label: __("Assigned To") },
+    { fieldname: "creation", fieldtype: "Datetime", label: __("Created On") },
+    { fieldname: "modified", fieldtype: "Datetime", label: __("Last Updated On") },
+  ];
+
   const standardFields = STANDARD_FIELDS.map((f) =>
     f.fieldname === "name" ? { ...f, options: doctype } : f
   );

@@ -135,20 +135,25 @@ frappe.ui.form.PrintView = class {
 		this.sidebar = this.page.sidebar.addClass("print-preview-sidebar");
 		this.add_sidebar_heading(__("Format"));
 
-		this.print_format_field = this.add_sidebar_item({
-			fieldtype: "Link",
-			fieldname: "print_format",
-			options: "Print Format",
-			label: __("Print Format"),
-			get_query: () => {
-				return {
-					filters: {
-						doc_type: this.frm.doctype,
-						print_format_for: ["in", ["DocType", ""]],
-					},
-				};
+		this.print_format_field = frappe.ui.form.make_control({
+			parent: this.sidebar,
+			render_input: 1,
+			...print_format_link_options(this),
+			df: {
+				fieldtype: "Link",
+				fieldname: "print_format",
+				options: "Print Format",
+				label: __("Print Format"),
+				get_query: () => {
+					return {
+						filters: {
+							doc_type: this.frm.doctype,
+							print_format_for: ["in", ["DocType", ""]],
+						},
+					};
+				},
+				change: () => this.refresh_print_format(),
 			},
-			change: () => this.refresh_print_format(),
 		});
 		this.print_format_selector = this.print_format_field.$input;
 
@@ -303,14 +308,21 @@ frappe.ui.form.PrintView = class {
 			this.render_style_options();
 			this.preview();
 		});
-		frappe.xcall("frappe.printing.page.print.print.get_print_styles").then((names) => {
-			const rank = (name) =>
-				STANDARD_PRINT_STYLES.includes(name)
-					? STANDARD_PRINT_STYLES.indexOf(name)
-					: STANDARD_PRINT_STYLES.length;
-			this.print_styles = names.sort((a, b) => rank(a) - rank(b));
-			this.render_style_options();
-		});
+		frappe
+			.xcall("frappe.printing.page.print.print.get_print_styles", { with_labels: true })
+			.then((styles) => {
+				const rank = (name) =>
+					STANDARD_PRINT_STYLES.includes(name)
+						? STANDARD_PRINT_STYLES.indexOf(name)
+						: STANDARD_PRINT_STYLES.length;
+				this.print_style_labels = new Map(
+					styles.map((style) => [style.name, style.label])
+				);
+				this.print_styles = styles
+					.map((style) => style.name)
+					.sort((a, b) => rank(a) - rank(b));
+				this.render_style_options();
+			});
 	}
 
 	render_style_options() {
@@ -338,7 +350,7 @@ frappe.ui.form.PrintView = class {
 	}
 
 	print_style_label(name) {
-		return STANDARD_PRINT_STYLES.includes(name) ? __(name) : name;
+		return this.print_style_labels?.get(name) ?? name;
 	}
 
 	toggle_style_picker() {
@@ -544,28 +556,38 @@ frappe.ui.form.PrintView = class {
 		if (!format_name || format_name === "Standard") {
 			return this.set_default_letterhead();
 		}
-		return frappe
-			.call({
-				method: "frappe.client.get",
-				args: { doctype: "Print Format", name: format_name },
-			})
-			.then((r) => {
-				let letter_head = null;
-				try {
-					letter_head = r.message?.format_data
-						? JSON.parse(r.message.format_data)?.letter_head
-						: null;
-				} catch (_) {
-					// malformed format_data — fall through to default letterhead
-				}
-				if (letter_head) {
-					this.letterhead_selector.val(letter_head);
-				} else if (letter_head === "") {
-					this.letterhead_selector.val("");
-				} else {
-					return this.set_default_letterhead();
-				}
-			});
+		const print_format = this.get_print_format(format_name);
+		const can_use_metadata =
+			!frappe.model.can_read("Print Format") &&
+			print_format.name === format_name &&
+			print_format.doc_type === this.frm.doctype &&
+			print_format.docstatus < 2 &&
+			!cint(print_format.disabled) &&
+			["DocType", ""].includes(print_format.print_format_for || "") &&
+			Object.hasOwn(print_format, "format_data");
+		const format_request = can_use_metadata
+			? Promise.resolve({ message: print_format })
+			: frappe.call({
+					method: "frappe.client.get",
+					args: { doctype: "Print Format", name: format_name },
+			  });
+		return format_request.then((r) => {
+			let letter_head = null;
+			try {
+				letter_head = r.message?.format_data
+					? JSON.parse(r.message.format_data)?.letter_head
+					: null;
+			} catch (_) {
+				// malformed format_data — fall through to default letterhead
+			}
+			if (letter_head) {
+				this.letterhead_selector.val(letter_head);
+			} else if (letter_head === "") {
+				this.letterhead_selector.val("");
+			} else {
+				return this.set_default_letterhead();
+			}
+		});
 	}
 
 	// bind_events () {
@@ -1300,7 +1322,11 @@ frappe.ui.form.PrintView = class {
 	}
 
 	selected_format() {
-		return this.print_format_selector.val() || "Standard";
+		return (
+			(this.print_format_field
+				? this.print_format_field.get_input_value()
+				: this.print_format_selector.val()) || "Standard"
+		);
 	}
 
 	is_raw_printing(format) {
@@ -1329,6 +1355,34 @@ frappe.ui.form.PrintView = class {
 	}
 
 	printer_setting_dialog() {
+		const doctype = this.frm.doctype;
+		const print_format_label = (name) => {
+			if (name === "Standard") return __("Standard");
+			const format = locals[":Print Format"]?.[name];
+			return doctype &&
+				this.frm?.doctype === doctype &&
+				this.frm.meta?.name === doctype &&
+				format?.name === name &&
+				format.standard === "Yes" &&
+				!cint(format.disabled) &&
+				format.docstatus < 2 &&
+				format.doc_type === doctype &&
+				["DocType", ""].includes(format.print_format_for || "") &&
+				frappe._messages[`${name}:Print Format Name`]
+				? frappe._messages[`${name}:Print Format Name`]
+				: name;
+		};
+		const on_make = (field) => {
+			const update = () =>
+				field.$input.find("option").each((_, option) => {
+					$(option).text(print_format_label(option.value));
+				});
+			field.$input
+				.off("select-change.print-format-name")
+				.on("select-change.print-format-name", update);
+			update();
+		};
+
 		// dialog for the Printer Settings
 		this.print_format_printer_map = this.get_print_format_printer_map();
 		this.data = this.print_format_printer_map[this.frm.doctype] || [];
@@ -1354,6 +1408,13 @@ frappe.ui.form.PrintView = class {
 							{
 								fieldtype: "Select",
 								fieldname: "print_format",
+								on_make,
+								formatter: (value, df) =>
+									typeof value === "string" && value
+										? `<span>${frappe.utils.escape_html(
+												print_format_label(value)
+										  )}</span>`
+										: frappe.form.formatters.Select(value, df),
 								default: 0,
 								options: frappe.meta.get_print_formats(this.frm.doctype),
 								read_only: 0,
@@ -1404,3 +1465,128 @@ frappe.ui.form.PrintView = class {
 		});
 	}
 };
+
+function print_format_link_options(print_view) {
+	const original = frappe.ui.form.ControlLink.prototype;
+	const primary_match = Symbol("primary Print Format match");
+	const context = ":Print Format Name";
+	const candidates = () =>
+		Object.keys(frappe._messages)
+			.filter((key) => key.endsWith(context) && frappe._messages[key])
+			.map((key) => key.slice(0, -context.length));
+	const metadata_matches = (name) => {
+		const format = locals[":Print Format"]?.[name];
+		return (
+			format?.standard === "Yes" &&
+			!cint(format.disabled) &&
+			format.doc_type === print_view.frm.doctype &&
+			["DocType", ""].includes(format.print_format_for || "")
+		);
+	};
+	const source_fingerprint = (names) =>
+		JSON.stringify([
+			frappe.boot.lang,
+			print_view.frm.doctype,
+			names.map((name) => {
+				const format = locals[":Print Format"]?.[name];
+				return [
+					name,
+					frappe._messages[`${name}${context}`],
+					format
+						? [
+								format.standard,
+								cint(format.disabled),
+								format.doc_type,
+								format.print_format_for || "",
+						  ]
+						: null,
+				];
+			}),
+		]);
+	const current_choices = (field) =>
+		field._print_format_source === source_fingerprint(candidates())
+			? field._print_format_choices || []
+			: [];
+	return {
+		get_translated(value) {
+			const eligible = locals[":Print Format"]?.[value]
+				? metadata_matches(value)
+				: current_choices(this).some((row) => row.value === value);
+			return eligible && frappe._messages[`${value}${context}`]
+				? frappe._messages[`${value}${context}`]
+				: value;
+		},
+		async on_input(event) {
+			const term = event ? event.target.value : this.$input.val();
+			const request = (this._print_format_request || 0) + 1;
+			this._print_format_request = request;
+			const names = candidates();
+			const source = source_fingerprint(names);
+			let choices = [];
+			if (names.length) {
+				const args = this.get_search_args("");
+				args.filters = {
+					...args.filters,
+					standard: "Yes",
+					name: ["in", names],
+				};
+				args.page_length = names.length;
+				choices = await frappe
+					.call({
+						method: "frappe.desk.search.search_link",
+						args,
+						no_spinner: true,
+					})
+					.then(
+						(response) => response.message,
+						() => []
+					);
+			}
+			if (
+				request !== this._print_format_request ||
+				this.$input.val() !== term ||
+				source_fingerprint(candidates()) !== source ||
+				!this.$input.is(":focus")
+			) {
+				return;
+			}
+			this._print_format_choices = choices;
+			this._print_format_source = source;
+			const fingerprint = JSON.stringify([source, choices.map((row) => row.value)]);
+			if (fingerprint !== this._print_format_fingerprint) {
+				this.$input.cache = {};
+				this._print_format_fingerprint = fingerprint;
+			}
+			return original.on_input.call(this, { target: { value: term } });
+		},
+		merge_duplicates(results) {
+			const primary_names = new Set(results.map((row) => row.value));
+			const primary = results.map((row) => ({ ...row, [primary_match]: true }));
+			const additional = current_choices(this)
+				.filter((row) => !primary_names.has(row.value))
+				.map((row) => ({ ...row }));
+			return original.merge_duplicates.call(this, [...primary, ...additional]).map((row) => {
+				const label = this.get_translated(row.label || row.value);
+				if (label !== (row.label || row.value)) {
+					row.html = `<strong>${frappe.utils.escape_html(
+						label
+					)}</strong><br><span class="small">${frappe.utils.escape_html(
+						row.value
+					)}</span>`;
+				}
+				return row;
+			});
+		},
+		custom_awesomplete_filter(awesomplete) {
+			awesomplete.filter = (item, input) => {
+				const row = awesomplete.get_item(item.value);
+				return (
+					row.action ||
+					row[primary_match] ||
+					!input ||
+					this.input_matches_item(input.toLowerCase(), row)
+				);
+			};
+		},
+	};
+}

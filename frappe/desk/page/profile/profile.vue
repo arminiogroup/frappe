@@ -316,7 +316,11 @@ watch(screen, (name) => emit("title", SCREENS[name] || __("Profile")), { immedia
 					<Row
 						icon="lucide-signature"
 						:label="__('Email Signature')"
-						:value="user_data.email_signature ? __('Set') : __('Not set')"
+						:value="
+							user_data.email_signature
+								? __('Set', null, 'Email Signature')
+								: __('Not set', null, 'Email Signature')
+						"
 						@click="change('email_signature')"
 					/>
 				</Group>

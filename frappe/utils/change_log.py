@@ -382,6 +382,11 @@ def show_update_popup():
 	# Check if user is int the set of users to send update message to
 	update_message = ""
 	if frappe.cache.sismember("changelog-update-user-set", user):
+		release_types = {
+			"major": _("major", context="Release Type"),
+			"minor": _("minor", context="Release Type"),
+			"patch": _("patch", context="Release Type"),
+		}
 		for update_type in updates:
 			release_links = ""
 			for app in updates[update_type]:
@@ -404,7 +409,9 @@ def show_update_popup():
 						</a> {security_msg}<br>
 					"""
 			if release_links:
-				message = _("New {} releases for the following apps are available").format(_(update_type))
+				message = _("New {} releases for the following apps are available").format(
+					release_types.get(update_type, _(update_type))
+				)
 				update_message += f"<div class='new-version-log'>{message}<div class='new-version-links'>{release_links}</div></div>"
 
 	primary_action = None

@@ -38,7 +38,10 @@ frappe.ui.form.SidebarUsers = class {
 				fullname: user_info.fullname,
 				abbr: user_info.abbr,
 				color: user_info.color,
-				title: __("{0} is currently {1}", [user_info.fullname, message]),
+				title:
+					message === "viewing this document"
+						? __("{0} is currently viewing this document", [user_info.fullname])
+						: __("{0} is currently composing an email", [user_info.fullname]),
 			});
 
 			if (users.new.indexOf(username) !== -1) {
@@ -66,10 +69,24 @@ frappe.ui.form.SidebarUsers = class {
 	show_alert(users, message) {
 		if (users.length) {
 			if (users.length === 1) {
-				frappe.show_alert(__("{0} is currently {1}", [users[0], message]));
+				frappe.show_alert(
+					message === "viewing this document"
+						? __("{0} is currently viewing this document", [users[0]])
+						: message === "composing an email"
+						? __("{0} is currently composing an email", [users[0]])
+						: __("{0} is currently {1}", [users[0], message])
+				);
 			} else {
 				frappe.show_alert(
-					__("{0} are currently {1}", [frappe.utils.comma_and(users), message])
+					message === "viewing this document"
+						? __("{0} are currently viewing this document", [
+								frappe.utils.comma_and(users),
+						  ])
+						: message === "composing an email"
+						? __("{0} are currently composing an email", [
+								frappe.utils.comma_and(users),
+						  ])
+						: __("{0} are currently {1}", [frappe.utils.comma_and(users), message])
 				);
 			}
 		}

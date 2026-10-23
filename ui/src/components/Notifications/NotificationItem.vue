@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Avatar, dayjs } from "frappe-ui";
+import { Avatar } from "frappe-ui";
+import { translate as __ } from "../../utils/translate";
+import { timeAgo as relativeTime } from "../ActivityTimeline/utils";
 import type { NotificationItemProps, NotificationLog } from "./types";
 
 const props = defineProps<NotificationItemProps>();
@@ -19,7 +21,7 @@ const title = computed(() => props.notification.title ?? props.notification.subj
 const description = computed(() => props.notification.description ?? "");
 
 const isUnread = computed(() => !props.notification.read);
-const timeAgo = computed(() => dayjs(props.notification.creation as string).fromNow());
+const timeAgo = computed(() => relativeTime(props.notification.creation));
 
 function activate() {
 	emit("click", props.notification);
@@ -48,7 +50,7 @@ function activate() {
 				class="absolute top-1/2 size-[5px] -translate-y-1/2 rounded-full bg-gray-800"
 				style="left: -10px"
 			>
-				<span class="sr-only">Unread</span>
+				<span class="sr-only">{{ __("Unread", [], "Notification Log") }}</span>
 			</span>
 			<slot name="prefix" :notification="notification">
 				<Avatar :image="notification.from_user_image" :label="avatarLabel" size="lg" />

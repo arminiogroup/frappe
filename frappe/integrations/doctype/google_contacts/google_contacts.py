@@ -233,7 +233,7 @@ def insert_contacts_to_google_contacts(doc, method=None):
 		frappe.db.set_value("Contact", doc.name, "google_contacts_id", contact.get("resourceName"))
 	except HttpError as err:
 		frappe.msgprint(
-			_("Google Calendar - Could not insert contact in Google Contacts {0}, error code {1}.").format(
+			_("Could not create the contact in Google Contacts account {0}. Error code: {1}.").format(
 				account.name, err.resp.status
 			)
 		)

@@ -1403,7 +1403,7 @@ frappe.pages["component-explorer"].on_page_load = function (wrapper) {
 											)
 											.append(
 												frappe.ui.button({
-													label: __("Open"),
+													label: __("Open", null, "Access"),
 													variant: "solid",
 												})
 											),

@@ -1536,7 +1536,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 
 		let translated_doctypes = frappe.boot?.translated_doctypes || [];
 		if (translated_doctypes.includes(df.options)) {
-			value_display = __(value_display);
+			value_display = __(value_display, null, df.options);
 		}
 
 		const format = () => {

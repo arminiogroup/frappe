@@ -1,3 +1,5 @@
+import { translate as __ } from "../../utils/translate";
+import { translateDocFieldText } from "../../utils/translateDocField";
 import type { RawMetaField } from "../FormLayout/types";
 import type { Sort } from "../SortBy/types";
 import type {
@@ -18,6 +20,22 @@ export const AGGREGATE_FUNCTIONS: ReadonlyArray<{
   { label: "Min", value: "min" },
   { label: "Max", value: "max" },
 ];
+
+export function aggregateFunctionLabel(fn: AggregateFunction): string {
+  switch (fn) {
+    case "count":
+      return __("Count");
+    case "sum":
+      return __("Sum");
+    case "avg":
+      return __("Average");
+    case "min":
+      return __("Min");
+    case "max":
+      return __("Max");
+  }
+  return "";
+}
 
 /** Fieldtypes whose values make sensible groups, as desk's report view offers them;
  *  free text and long text don't. */
@@ -45,55 +63,60 @@ const NUMERIC_FIELDTYPES = new Set([
 const TIME_FIELDTYPES = new Set(["Date", "Datetime", "Time"]);
 
 /** Standard timestamps every doctype has, which min and max can run on. */
-const STANDARD_TIME_FIELDS: ReadonlyArray<GroupByField> = [
-  {
-    label: "Created On",
-    value: "creation",
-    fieldname: "creation",
-    fieldtype: "Datetime",
-  },
-  {
-    label: "Last Modified",
-    value: "modified",
-    fieldname: "modified",
-    fieldtype: "Datetime",
-  },
-];
+function standardTimeFields(): ReadonlyArray<GroupByField> {
+  return [
+    {
+      label: __("Created On"),
+      value: "creation",
+      fieldname: "creation",
+      fieldtype: "Datetime",
+    },
+    {
+      label: __("Last Modified"),
+      value: "modified",
+      fieldname: "modified",
+      fieldtype: "Datetime",
+    },
+  ];
+}
 
 /** Standard fields every doctype can be grouped by, after the Meta fields: desk's
  *  standard fields of a groupable fieldtype, less `name` and `idx`. */
-const STANDARD_GROUP_FIELDS: ReadonlyArray<GroupByField> = [
-  {
-    label: "Created By",
-    value: "owner",
-    fieldname: "owner",
-    fieldtype: "Link",
-    options: "User",
-  },
-  {
-    label: "Last Modified By",
-    value: "modified_by",
-    fieldname: "modified_by",
-    fieldtype: "Link",
-    options: "User",
-  },
-  {
-    label: "Tags",
-    value: "_user_tags",
-    fieldname: "_user_tags",
-    fieldtype: "Data",
-  },
-  {
-    label: "Document Status",
-    value: "docstatus",
-    fieldname: "docstatus",
-    fieldtype: "Int",
-  },
-];
+function standardGroupFields(): ReadonlyArray<GroupByField> {
+  return [
+    {
+      label: __("Created By"),
+      value: "owner",
+      fieldname: "owner",
+      fieldtype: "Link",
+      options: "User",
+    },
+    {
+      label: __("Last Modified By"),
+      value: "modified_by",
+      fieldname: "modified_by",
+      fieldtype: "Link",
+      options: "User",
+    },
+    {
+      label: __("Tags"),
+      value: "_user_tags",
+      fieldname: "_user_tags",
+      fieldtype: "Data",
+    },
+    {
+      label: __("Document Status"),
+      value: "docstatus",
+      fieldname: "docstatus",
+      fieldtype: "Int",
+    },
+  ];
+}
 
 function toField(f: RawMetaField): GroupByField {
   return {
-    label: f.label as string,
+    label: translateDocFieldText(f, f.label) as string,
+    ...(f.parent ? { parent: f.parent, context: f.context } : {}),
     value: f.fieldname,
     fieldname: f.fieldname,
     fieldtype: f.fieldtype,
@@ -116,7 +139,7 @@ export function getGroupByFields(
     ...fields
       .filter((f) => isQueryable(f) && GROUPABLE_FIELDTYPES.has(f.fieldtype))
       .map(toField),
-    ...STANDARD_GROUP_FIELDS,
+    ...standardGroupFields(),
   ].filter((f) => !exclude.includes(f.fieldname));
 }
 
@@ -142,7 +165,7 @@ export function getAggregateFields(
     )
     .map(toField);
   return (
-    allowsTimes ? [...metaFields, ...STANDARD_TIME_FIELDS] : metaFields
+    allowsTimes ? [...metaFields, ...standardTimeFields()] : metaFields
   ).filter((f) => !exclude.includes(f.fieldname));
 }
 
@@ -153,7 +176,7 @@ export function findGroupByField(
 ): GroupByField | undefined {
   const meta = fields.find((f) => f.fieldname === fieldname);
   if (meta) return toField(meta);
-  return [...STANDARD_GROUP_FIELDS, ...STANDARD_TIME_FIELDS].find(
+  return [...standardGroupFields(), ...standardTimeFields()].find(
     (f) => f.fieldname === fieldname
   );
 }

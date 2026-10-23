@@ -25,12 +25,16 @@
 	<table class="table"{% if _frame_style %} style="{{ _frame_style|e }}"{% endif %}>
 		{% set columns = df.table_columns %}
 		{%- if not _no_header -%}
+		{%- set _table_df = doc.meta.fields|selectattr("fieldname", "equalto", df.fieldname)|first|default(none) if doc.meta else none -%}
+		{%- set _child_meta = frappe.get_meta(_table_df.options) if _table_df and _table_df.fieldtype == "Table" and _table_df.options else none -%}
 		<thead>
 			<tr class="table-row">
 				{% for column in columns %}
 				{%- set _merged_col = column.merged_fields and column.merged_fields|length > 0 -%}
 				<th class="column-header{% if _merged_col %} column-value--merged{% endif %}" width="{{ column.width }}%"{% if _cell_style %} style="{{ _cell_style|e }}"{% endif %} {{ field_attributes(column) }}>
-					{{ _(column.label or column.fieldname)|e }}
+					{%- set _canonical_df = _child_meta.fields|selectattr("fieldname", "equalto", column.fieldname)|first|default(none) if _child_meta else none -%}
+					{%- set _caption = column.label or column.fieldname -%}
+					{{ _(_caption, context=_child_meta.name if _canonical_df and _caption == (_canonical_df.label or _canonical_df.fieldname) else none)|e }}
 				</th>
 				{% endfor %}
 			</tr>

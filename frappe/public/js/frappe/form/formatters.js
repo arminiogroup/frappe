@@ -3,6 +3,8 @@
 
 // for license information please see license.txt
 
+import { selectOptionContext } from "../utils/select_option_context";
+
 frappe.provide("frappe.form.formatters");
 
 frappe.form.link_formatters = {};
@@ -50,7 +52,12 @@ frappe.form.formatters = {
 		return __(frappe.form.formatters["Data"](value, df));
 	},
 	Select: function (value, df) {
-		return __(frappe.form.formatters["Data"](value, df));
+		const formatted_value = frappe.form.formatters["Data"](value, df);
+		const context =
+			formatted_value === value
+				? selectOptionContext(value, df || {}, frappe._messages)
+				: df?.context || df?.parent;
+		return __(formatted_value, null, context);
 	},
 	Float: function (value, docfield, options, doc) {
 		if (value === null) {
@@ -170,6 +177,7 @@ frappe.form.formatters = {
 		var doctype = docfield._options || docfield.options;
 		var original_value = value;
 		let link_title = frappe.utils.get_link_title(doctype, value);
+		let custom_link_formatter = false;
 
 		if (link_title === value) {
 			link_title = null;
@@ -187,6 +195,7 @@ frappe.form.formatters = {
 			// don't apply formatters in case of composite (parent field of same type)
 			if (doc && doctype !== doc.doctype) {
 				value = frappe.form.link_formatters[doctype](value, doc, docfield);
+				custom_link_formatter = true;
 			}
 		}
 
@@ -210,7 +219,10 @@ frappe.form.formatters = {
 				a.dataset.doctype = doctype;
 				a.dataset.name = original_value;
 				a.dataset.value = original_value;
-				a.innerText = __((options && options.label) || link_title || value);
+				a.innerText =
+					(options && options.label) || custom_link_formatter
+						? __((options && options.label) || link_title || value)
+						: get_link_display_value(doctype, link_title, value);
 				return a.outerHTML;
 			} else {
 				return get_link_display_value(doctype, link_title, value);
@@ -421,7 +433,7 @@ frappe.form.formatters = {
 function get_link_display_value(doctype, link_title, value) {
 	let translated_doctypes = frappe.boot?.translated_doctypes || [];
 	if (translated_doctypes.includes(doctype)) {
-		return __(link_title || value);
+		return __(link_title || value, null, doctype);
 	}
 	return link_title || value;
 }

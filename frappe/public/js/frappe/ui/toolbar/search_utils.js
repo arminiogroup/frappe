@@ -96,7 +96,7 @@ frappe.search.utils = {
 						break;
 				}
 
-				out.label = __(view_name.bold()) + " " + labelSuffix;
+				out.label = __(view_name).bold() + " " + labelSuffix;
 				out.value = __(view_name) + " " + labelSuffix;
 			} else if (match[0]) {
 				out.label = frappe.utils.escape_html(match[0]).bold();
@@ -168,9 +168,13 @@ frappe.search.utils = {
 		var me = this;
 		var out = [];
 		var firstKeyword = keywords.split(" ")[0];
-		if (firstKeyword.toLowerCase() === __("new")) {
+		if (firstKeyword.toLowerCase() === __("new").toLowerCase()) {
 			frappe.boot.user.can_create.forEach(function (item) {
-				const search_result = me.fuzzy_search(keywords.substr(4), item, true);
+				const search_result = me.fuzzy_search(
+					keywords.slice(firstKeyword.length).trimStart(),
+					item,
+					true
+				);
 				var level = search_result.score;
 				if (level) {
 					out.push({
@@ -195,18 +199,30 @@ frappe.search.utils = {
 
 		var score, marked_string, target;
 		var option = function (type, route, order) {
+			const format_label = (title) => {
+				switch (type) {
+					case "List":
+						return __("{0} List", [title]);
+					case "Tree":
+						return __("{0} Tree", [title]);
+					case "Report":
+						return __("{0} Report", [title]);
+					default:
+						return title;
+				}
+			};
 			// check to skip extra list in the text
 			// eg. Price List List should be only Price List
 			let skip_list = type === "List" && target.endsWith("List");
 			if (skip_list) {
 				var label = marked_string || __(target);
 			} else {
-				label = __(`{0} ${skip_list ? "" : type}`, [marked_string || __(target)]);
+				label = format_label(marked_string || __(target));
 			}
 			return {
 				type: type,
 				label: label,
-				value: __(`{0} ${type}`, [target]),
+				value: format_label(__(target)),
 				index: score + order,
 				match: target,
 				route: route,

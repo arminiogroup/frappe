@@ -2155,7 +2155,7 @@ Object.assign(frappe.utils, {
 				},
 				{
 					fieldname: "medium",
-					label: __("Medium"),
+					label: __("Medium", null, "UTM Medium"),
 					fieldtype: "Link",
 					options: "UTM Medium",
 					description: "Marketing medium (e.g. cpc, banner, email)",

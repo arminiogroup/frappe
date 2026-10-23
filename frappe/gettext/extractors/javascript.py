@@ -1,4 +1,7 @@
+import re
 from io import BufferedReader
+
+TEMPLATE_INTERPOLATION = re.compile(r"(?<!\\)(?:\\\\)*\$\{")
 
 
 def extract(fileobj: BufferedReader, keywords: str, comment_tags: tuple, options: dict):
@@ -20,6 +23,10 @@ def extract(fileobj: BufferedReader, keywords: str, comment_tags: tuple, options
 				messages = messages[0]
 
 		yield lineno, funcname, messages, []
+
+
+def extract_typescript(fileobj: BufferedReader, keywords: str, comment_tags: tuple, options: dict):
+	yield from extract(fileobj, keywords, comment_tags, {**options, "jsx": False})
 
 
 def extract_javascript(code, keywords=None, options=None, lineno=1):
@@ -44,6 +51,7 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 	:param options: a dictionary of additional options (optional)
 	    Supported options are:
 	        * `template_string` -- set to false to disable ES6 template string support.
+	        * `jsx` -- set to false for TypeScript without JSX.
 	"""
 	from babel.messages.jslexer import Token, tokenize, unquote_string
 
@@ -57,6 +65,7 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 	messages = []
 	last_argument = None
 	concatenate_next = False
+	argument_is_dynamic = False
 	last_token = None
 	call_stack = -1
 
@@ -76,11 +85,14 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 
 	for token in tokenize(
 		code,
-		jsx=True,
+		jsx=options.get("jsx", True),
 		dotted=dotted,
 		template_string=options.get("template_string", True),
 		lineno=lineno,
 	):
+		if token.type == "template_string":
+			yield from parse_template_string(token.value, keywords, options, token.lineno)
+
 		if (  # Turn keyword`foo` expressions into keyword("foo") calls:
 			funcname
 			and (last_token and last_token.type == "name")  # have a keyword...
@@ -88,13 +100,10 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 			== "template_string"  # this is a template string
 		):
 			message_lineno = token.lineno
-			messages = [unquote_string(token.value)]
+			messages = [None if _is_dynamic_template(token.value) else unquote_string(token.value)]
 			call_stack = 0
 			tree_level = 0
 			token = Token("operator", ")", token.lineno)
-
-		if not funcname and token.type == "template_string":
-			yield from parse_template_string(token.value, keywords, options, token.lineno)
 
 		if token.type == "operator" and token.value == "(":
 			if call_stack >= 0 and last_token.type == "name" and last_token.value in keywords:
@@ -105,6 +114,7 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 						messages,
 						last_argument,
 						concatenate_next,
+						argument_is_dynamic,
 						call_stack,
 						tree_level,
 					)
@@ -114,6 +124,7 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 				messages = []
 				last_argument = None
 				concatenate_next = False
+				argument_is_dynamic = False
 				call_stack = 0
 				tree_level = 0
 			elif funcname:
@@ -140,7 +151,7 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 				else:
 					messages = None
 
-				if messages is not None:
+				if messages and messages[0]:
 					yield (message_lineno, funcname, messages)
 
 				if outer_calls:
@@ -150,12 +161,14 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 						messages,
 						last_argument,
 						concatenate_next,
+						argument_is_dynamic,
 						call_stack,
 						tree_level,
 					) = outer_calls.pop()
 				else:
 					funcname = message_lineno = last_argument = None
 					concatenate_next = False
+					argument_is_dynamic = False
 					messages = []
 					call_stack = -1
 					tree_level = 0
@@ -163,6 +176,11 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 			elif token.type in ("string", "template_string"):
 				new_value = unquote_string(token.value)
 				if tree_level > 0:
+					pass
+				elif token.type == "template_string" and _is_dynamic_template(token.value):
+					argument_is_dynamic = True
+					last_argument = None
+				elif argument_is_dynamic:
 					pass
 				elif concatenate_next:
 					last_argument = (last_argument or "") + new_value
@@ -179,12 +197,13 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 						if tree_level == 0:
 							messages.append(None)
 					concatenate_next = False
+					if tree_level == 0:
+						argument_is_dynamic = False
 				elif token.value == "+":
 					concatenate_next = True
 
 		elif call_stack > 0 and token.type == "operator" and token.value == ")":
 			call_stack -= 1
-			tree_level = 0
 
 		elif funcname and call_stack == -1:
 			funcname = None
@@ -198,6 +217,10 @@ def extract_javascript(code, keywords=None, options=None, lineno=1):
 			funcname = token.value
 
 		last_token = token
+
+
+def _is_dynamic_template(value):
+	return TEMPLATE_INTERPOLATION.search(value) is not None
 
 
 def parse_template_string(
@@ -222,9 +245,10 @@ def parse_template_string(
 	inside_expression_str = False
 	expression_lineno = lineno
 	expression_contents = ""
-	for character in template_string[1:-1]:
+	interpolations = {match.end() - 1 for match in TEMPLATE_INTERPOLATION.finditer(template_string)}
+	for index, character in enumerate(template_string[1:-1], start=1):
 		if not level:
-			if character == "{" and prev_character == "$":
+			if index in interpolations:
 				expression_lineno = current_lineno
 				level += 1
 		else:

@@ -144,7 +144,10 @@ frappe.ui.BackgroundTasks = class BackgroundTasks {
 					Queued: { message: __("{0} queued", [title]), indicator: "blue" },
 					Running: { message: __("{0} started", [title]), indicator: "blue" },
 					Completed: { message: __("{0} completed", [title]), indicator: "green" },
-					Failed: { message: __("{0} failed", [title]), indicator: "red" },
+					Failed: {
+						message: __("{0} failed", [title], "Background Task"),
+						indicator: "red",
+					},
 					Cancelled: { message: __("{0} cancelled", [title]), indicator: "orange" },
 				};
 
@@ -265,7 +268,7 @@ frappe.ui.BackgroundTasks = class BackgroundTasks {
 				</div>
 				<div class="bg-task-actions" style="display: flex; align-items: center; justify-content: flex-end; min-width: 60px; flex-shrink: 0;">
 					${frappe.ui.badge.html({
-						label: task.status,
+						label: __(task.status, null, "Background Task"),
 						theme: color,
 						css_class: "status-badge",
 					})}

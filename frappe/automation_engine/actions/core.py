@@ -6,7 +6,7 @@ from typing import ClassVar
 from urllib.parse import urljoin, urlparse
 
 import frappe
-from frappe import _
+from frappe import N_, _
 from frappe.automation_engine.actions.base import (
 	USER_CONTROL,
 	AutomationAction,
@@ -29,7 +29,7 @@ SCRIPT_TYPE = "API"
 
 def _require_doc(doc, action_type):
 	if doc is None:
-		raise AutomationParamError(_("{0} requires a target document").format(action_type))
+		raise AutomationParamError(_("{0} requires a target document").format(_(action_type)))
 
 
 def _as_list(value) -> list:
@@ -48,7 +48,7 @@ def _as_list(value) -> list:
 
 class SetFieldValue(AutomationAction):
 	action_type = "SetFieldValue"
-	label = "Set Field Value"
+	label = N_("Set Field Value")
 	description = "Set value of document fields."
 	params_schema: ClassVar[list] = [
 		{"fieldname": "field", "label": "Field", "fieldtype": "Select", "options_source": "doc_fields"},
@@ -95,7 +95,7 @@ class SetFieldValue(AutomationAction):
 
 class CreateDocument(AutomationAction):
 	action_type = "CreateDocument"
-	label = "Create Document"
+	label = N_("Create Document")
 	description = "Create a new document."
 	requires_document = False
 	output_schema: ClassVar[dict] = {"destination_reference": {"doctype": "Dynamic", "cardinality": "one"}}
@@ -135,7 +135,7 @@ class CreateDocument(AutomationAction):
 
 class IncrementFieldValue(AutomationAction):
 	action_type = "IncrementFieldValue"
-	label = "Increment Field Value"
+	label = N_("Increment Field Value")
 	description = "Add a number to a field on the target document."
 	params_schema: ClassVar[list] = [
 		{
@@ -214,7 +214,7 @@ def _assignees(doc) -> list:
 
 class SendNotification(AutomationAction):
 	action_type = "SendNotification"
-	label = "Send Notification"
+	label = N_("Send Notification")
 	description = "Send an email or system notification."
 	params_schema: ClassVar[list] = [
 		{
@@ -297,7 +297,7 @@ class SendNotification(AutomationAction):
 
 class AssignToUser(AutomationAction):
 	action_type = "AssignToUser"
-	label = "Assign to User"
+	label = N_("Assign to User")
 	description = "Assign the document to user(s)."
 	params_schema: ClassVar[list] = [
 		{
@@ -333,7 +333,7 @@ class AssignToUser(AutomationAction):
 
 class CallWebhook(AutomationAction):
 	action_type = "CallWebhook"
-	label = "Call Webhook"
+	label = N_("Call Webhook")
 	description = "Send an HTTP request to an external URL."
 	requires_document = False
 	transactional = False
@@ -394,7 +394,7 @@ class CallWebhook(AutomationAction):
 
 class RunScript(AutomationAction):
 	action_type = "RunScript"
-	label = "Run Script"
+	label = N_("Run Script")
 	description = "Run a server script."
 	requires_document = False
 	# A script is arbitrary code: it may send mail or call out, and nothing here can tell.

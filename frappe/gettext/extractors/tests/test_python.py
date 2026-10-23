@@ -8,6 +8,69 @@ from frappe.tests import UnitTestCase
 
 
 class TestPython(UnitTestCase):
+	def test_dynamic_messages_do_not_extract_subscript_keys_or_fragments(self):
+		code = textwrap.dedent(
+			"""
+			_(app_detail["setup_wizard_text"])
+			_(entry["title"])
+			_(name or "fallback")
+			_("Prefix " + name)
+			_(entry["title"], context="Dock")
+			_(entry["title"]) + _("Visible", context="Label")
+			_("Static " + "message")
+			_("Adjacent " "literals")
+			"""
+		)
+		messages = extract(
+			"frappe.gettext.extractors.python.extract", BytesIO(code.encode()), keywords=PYTHON_KEYWORDS
+		)
+		self.assertEqual(
+			[(line, message, context) for line, message, _comments, context in messages],
+			[
+				(4, "fallback", None),
+				(7, "Visible", "Label"),
+				(8, "Static message", None),
+				(9, "Adjacent literals", None),
+			],
+		)
+
+	def test_extract_noop_context(self):
+		code = textwrap.dedent(
+			"""
+			N_("Plain")
+			N_("Keyword", context="keywordctx")
+			N_("Positional", "positionalctx")
+			N_("No context", None)
+			N_("Dynamic", context=variable)
+			N_("Dup") if flag else N_("Dup", context="dupctx")
+			_("Mixed", "de") + N_("Mixed", "noopctx") + _lt("Mixed", "de", "lazyctx")
+			N_(
+				"Multi line",
+				context="multictx",
+			)
+		"""
+		)
+		messages = extract(
+			"frappe.gettext.extractors.python.extract", BytesIO(code.encode()), keywords=PYTHON_KEYWORDS
+		)
+
+		self.assertEqual(
+			[(line, message, context) for line, message, _comments, context in messages],
+			[
+				(2, "Plain", None),
+				(3, "Keyword", "keywordctx"),
+				(4, "Positional", "positionalctx"),
+				(5, "No context", None),
+				(6, "Dynamic", None),
+				(7, "Dup", None),
+				(7, "Dup", "dupctx"),
+				(8, "Mixed", None),
+				(8, "Mixed", "noopctx"),
+				(8, "Mixed", "lazyctx"),
+				(10, "Multi line", "multictx"),
+			],
+		)
+
 	def test_extract_noop(self):
 		messages = list(
 			extract_python(

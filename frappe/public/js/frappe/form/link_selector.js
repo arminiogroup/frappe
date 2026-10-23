@@ -35,7 +35,7 @@ frappe.ui.form.LinkSelector = class LinkSelector {
 				{
 					fieldtype: "Button",
 					fieldname: "more",
-					label: __("More"),
+					label: __("More", null, "Pagination"),
 					click: () => {
 						me.start += me.page_length;
 						me.search();

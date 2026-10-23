@@ -1,4 +1,4 @@
-import { t } from "./translate";
+import { t as __ } from "./translate";
 import type { DataImportDoc, DataImportProgress } from "./types";
 
 export function progressPercent(progress: DataImportProgress): number {
@@ -9,9 +9,9 @@ export function progressPercent(progress: DataImportProgress): number {
 
 export function etaMessage(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
-  if (seconds < 60) return t("About {0} seconds remaining", [seconds]);
-  if (minutes === 1) return t("About {0} minute remaining", [minutes]);
-  return t("About {0} minutes remaining", [minutes]);
+  if (seconds < 60) return __("About {0} seconds remaining", [seconds]);
+  if (minutes === 1) return __("About {0} minute remaining", [minutes]);
+  return __("About {0} minutes remaining", [minutes]);
 }
 
 /** Before the first progress event the counts are still zero. */
@@ -26,18 +26,18 @@ export function progressMessage(
 ): string {
   if (!hasProgressCounts(progress)) return notStartedMessage(doc);
   const args = [progress.current, progress.total, etaMessage(progress.eta)];
-  if (progress.skipping) return t("Skipping {0} of {1}, {2}", args);
+  if (progress.skipping) return __("Skipping {0} of {1}, {2}", args);
   if (doc.import_type === "Update Existing Records")
-    return t("Updating {0} of {1}, {2}", args);
+    return __("Updating {0} of {1}, {2}", args);
   if (doc.import_type === "Insert or Update Records")
-    return t("Importing or updating {0} of {1}, {2}", args);
-  return t("Importing {0} of {1}, {2}", args);
+    return __("Importing or updating {0} of {1}, {2}", args);
+  return __("Importing {0} of {1}, {2}", args);
 }
 
 // "Pending" while running means Import was pressed here and the worker hasn't
 // picked the job up; "In Progress" means the import was opened mid-run.
 export function notStartedMessage(doc: DataImportDoc): string {
   return doc.status === "Pending"
-    ? t("Starting import...")
-    : t("Import is running. Progress updates will appear shortly.");
+    ? __("Starting import...")
+    : __("Import is running. Progress updates will appear shortly.");
 }

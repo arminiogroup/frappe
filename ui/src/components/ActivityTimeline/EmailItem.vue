@@ -8,7 +8,7 @@
 						<!-- sender email is hidden; surfaced on hover via tooltip -->
 						<Tooltip :text="email.data.sender">
 							<span class="min-w-0 truncate text-base font-medium text-ink-gray-6">{{
-								email?.author?.fullname || "Guest"
+								email?.author?.fullname || __("Guest")
 							}}</span>
 						</Tooltip>
 						<div class="flex items-center gap-2">
@@ -37,9 +37,9 @@
 					>
 						<template
 							v-for="(val, label) in {
-								To: email.data.to,
-								cc: email.data.cc,
-								bcc: email.data.bcc,
+								[__('To')]: email.data.to,
+								[__('Cc')]: email.data.cc,
+								[__('Bcc')]: email.data.bcc,
 							}"
 							:key="label"
 						>
@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { Badge, Tooltip } from "frappe-ui";
 import { computed } from "vue";
 import AttachmentChip from "./AttachmentChip.vue";
@@ -86,6 +87,6 @@ const status = computed(() => {
 	if (["Sent", "Clicked"].includes(deliveryStatus)) color = "green";
 	else if (["Sending", "Scheduled"].includes(deliveryStatus)) color = "amber";
 	else if (["Opened", "Read"].includes(deliveryStatus)) color = "blue";
-	return { label: deliveryStatus, color };
+	return { label: __(deliveryStatus, [], "Communication"), color };
 });
 </script>

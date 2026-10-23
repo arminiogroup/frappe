@@ -114,7 +114,7 @@ frappe.pages["dashboard-view"].on_page_load = function (wrapper) {
 
 		// The document's own name until the island reports a title, so the crumb
 		// trail is right while the island loads.
-		set_island_title(doc.name, doc.name);
+		set_island_title(doc.name, doc.is_standard ? __(doc.name, null, "Dashboard") : doc.name);
 
 		island = frappe.ui.mount_island(doc.__onload.island.name, container[0], {
 			...doc.__onload.island.props,
@@ -181,16 +181,17 @@ class Dashboard {
 	// crumb and the title would otherwise read `selling`.
 	show(doc) {
 		this.dashboard_name = doc.name;
-		this.set_breadcrumbs(doc.name);
+		const label = doc.is_standard ? __(doc.name, null, "Dashboard") : doc.name;
+		this.set_breadcrumbs(label);
 
-		let title = this.dashboard_name;
+		let title = label;
 		if (!this.dashboard_name.toLowerCase().includes(__("dashboard"))) {
 			// ensure dashboard title has "dashboard"
-			title = __("{0} Dashboard", [__(title)]);
+			title = __("{0} Dashboard", [title]);
 		}
 		// See `set_island_title` for why the title goes to the browser tab and
 		// not to `page.set_title`.
-		frappe.utils.set_title(__(title));
+		frappe.utils.set_title(title);
 		this.set_dropdown();
 		this.charts = {};
 		this.refresh();
@@ -317,15 +318,18 @@ class Dashboard {
 				this.number_card_group.widgets_list.forEach((card) => card.render_card());
 		});
 
-		frappe.db.get_list("Dashboard").then((dashboards) => {
+		frappe.db.get_list("Dashboard", { fields: ["name", "is_standard"] }).then((dashboards) => {
 			dashboards.map((dashboard) => {
 				let name = dashboard.name;
 				if (name != this.dashboard_name) {
-					this.page.add_menu_item(
+					const item = this.page.add_menu_item(
 						name,
 						() => frappe.set_route("dashboard-view", name),
 						1
 					);
+					if (dashboard.is_standard) {
+						item.find(".menu-item-label").text(__(name, null, "Dashboard"));
+					}
 				}
 			});
 		});

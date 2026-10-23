@@ -30,8 +30,8 @@ const loading = ref(true);
 const active_tab = ref("Unread");
 
 const tab_options = [
-	{ value: "Unread", label: __("Unread") },
-	{ value: "Read", label: __("Read") },
+	{ value: "Unread", label: __("Unread", null, "Notification list") },
+	{ value: "Read", label: __("Read", null, "Notification list") },
 ];
 
 const notifications = computed(() =>

@@ -2015,7 +2015,7 @@ class Column:
 				self.warnings.append(
 					{
 						"col": self.column_number,
-						"message": message.format(self.df.fieldtype, date_format),
+						"message": message.format(_(self.df.fieldtype), date_format),
 						"type": "info",
 					}
 				)

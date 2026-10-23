@@ -38,8 +38,13 @@ frappe.listview_settings["RQ Job"] = {
 									frappe.show_alert(__("Enabled Scheduler"));
 								})
 								.catch((e) => {
+									const detail = e?.message || e;
 									frappe.show_alert({
-										message: __("Failed to enable scheduler: {0}", e),
+										message: detail
+											? __("Failed to enable scheduler: {0}", [
+													frappe.utils.escape_html(detail),
+											  ])
+											: __("Failed to enable scheduler."),
 										indicator: "error",
 									});
 								});

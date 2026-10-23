@@ -10,7 +10,7 @@ import {
 } from "vue";
 import { getSocketInstance, subscribeToDoc } from "../../socket";
 import { METHODS, cint } from "./dataImport";
-import { t } from "./translate";
+import { t as __ } from "./translate";
 import type {
   DataImportDoc,
   DataImportLog,
@@ -285,7 +285,7 @@ export function useDataImport(
     )
       .then((data) => {
         if (isStale()) return null;
-        if (!data) throw new Error(t("Failed to load import file"));
+        if (!data) throw new Error(__("Failed to load import file"));
         preview.value = data;
         previewSource.value = source;
         return data;
@@ -297,7 +297,7 @@ export function useDataImport(
         previewFailedSource = source;
         previewError.value = serverErrorMessage(
           error,
-          t("Failed to load import file")
+          __("Failed to load import file")
         );
         return null;
       })
@@ -347,7 +347,7 @@ export function useDataImport(
         progress.value = null;
         startError.value = serverErrorMessage(
           error,
-          t("Import could not start")
+          __("Import could not start")
         );
       }
       return false;

@@ -967,7 +967,7 @@ frappe.search.SearchDialog = class {
 			if (results.length > 0) {
 				const cat_esc = frappe.utils.escape_html(type || "");
 				$(`<button type="button" class="btn btn-default btn-xs mt-2 list-more" data-search="Global" data-category="${cat_esc}">
-					${__("More")}
+					${__("More", null, "Pagination")}
 				</button>`).appendTo($panel);
 			}
 		} else {
@@ -983,7 +983,7 @@ frappe.search.SearchDialog = class {
 				const cat_esc = frappe.utils.escape_html(type || "");
 				$(`<button type="button" class="btn btn-default btn-xs mt-2 list-more" data-search="${fetch_type}"
 					data-category="${cat_esc}" data-count="${max_length}">
-						${__("More")}
+						${__("More", null, "Pagination")}
 				</button>`).appendTo($results_list.find(".result-body"));
 			}
 		}
@@ -1034,7 +1034,9 @@ frappe.search.SearchDialog = class {
 			const cat_esc = frappe.utils.escape_html(type || "");
 			more_html = `<div>
 				<button type="button" class="btn btn-default btn-xs section-more mt-2" data-fetch-type="Nav" data-category="${cat_esc}">${__(
-				"More"
+				"More",
+				null,
+				"Pagination"
 			)}</button>
 			</div>`;
 		}
@@ -1158,9 +1160,10 @@ frappe.search.SearchDialog = class {
 		if (results_set[0].results.length < this.more_count) {
 			this.$body.find(".list-more").hide();
 			let no_of_results = this.$body.find(".result").length;
-			const cue_word = no_of_results === 1 ? __("result") : __("results");
 			let no_of_results_cue = $('<div class="results-status">').text(
-				`${no_of_results} ${cue_word} ${__("found")}`
+				no_of_results === 1
+					? __("{0} result found", [no_of_results])
+					: __("{0} results found", [no_of_results])
 			);
 			this.$body.find(".more-results:last").append(no_of_results_cue);
 		}

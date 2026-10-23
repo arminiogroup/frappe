@@ -550,7 +550,7 @@ function _layout_preview_window(type) {
 function _render_dock_cards(panel, user_data) {
 	const current = user_data.dock_mode === "Floating" ? "Floating" : "Pinned";
 	const options = [
-		{ value: "Pinned", label: __("Pinned") },
+		{ value: "Pinned", label: __("Pinned", null, "User") },
 		{ value: "Floating", label: __("Floating") },
 	];
 

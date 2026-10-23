@@ -52,7 +52,7 @@ frappe.ui.form.on("Contact", {
 
 		let numbers = frm.doc.phone_nos;
 		if (numbers && numbers.length && frappe.phone_call.handler) {
-			frm.add_custom_button(__("Call"), () => {
+			frm.add_custom_button(__("Call", null, "Phone action"), () => {
 				numbers = frm.doc.phone_nos
 					.sort((prev, next) => next.is_primary_mobile_no - prev.is_primary_mobile_no)
 					.map((d) => d.phone);

@@ -16,7 +16,7 @@ frappe.dashboard_utils = {
 					<a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<button class="btn btn-secondary btn-xs">
 							${icon_html}
-							<span class="filter-label">${__(filter.label)}</span>
+							<span class="filter-label">${__(filter.label, null, filter.context)}</span>
 							${frappe.utils.icon("chevrons-up-down", "xs")}
 						</button>
 				</a>`;
@@ -29,7 +29,11 @@ frappe.dashboard_utils = {
 							`<li>
 						<a class="dropdown-item" data-fieldname="${
 							filter.fieldnames[i]
-						}" data-option="${encodeURIComponent(option)}">${__(option)}</a>
+						}" data-option="${encodeURIComponent(option)}">${__(
+								option,
+								null,
+								filter.context
+							)}</a>
 					</li>`
 					)
 					.join("");
@@ -39,7 +43,7 @@ frappe.dashboard_utils = {
 						(option) =>
 							`<li><a class="dropdown-item" data-option="${encodeURIComponent(
 								option
-							)}">${__(option)}</a></li>`
+							)}">${__(option, null, filter.context)}</a></li>`
 					)
 					.join("");
 			}
@@ -60,7 +64,9 @@ frappe.dashboard_utils = {
 				}
 
 				let selected_item = decodeURIComponent($el.data("option"));
-				$el.parents(`.${button_class}`).find(".filter-label").html(__(selected_item));
+				$el.parents(`.${button_class}`)
+					.find(".filter-label")
+					.html(__(selected_item, null, filter.context));
 				filter.action(selected_item, fieldname);
 			});
 		});

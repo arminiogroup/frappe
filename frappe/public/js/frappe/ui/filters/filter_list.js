@@ -164,7 +164,9 @@ frappe.ui.FilterGroup = class {
 		this.filter_button.find(".button-label").html(button_label);
 		this.filter_button.attr(
 			"title",
-			`${this.filters.length} Filter${this.filters.length > 1 ? "s" : ""} Applied`
+			this.filters.length === 1
+				? __("{0} Filter Applied", [this.filters.length])
+				: __("{0} Filters Applied", [this.filters.length])
 		);
 	}
 

@@ -125,7 +125,7 @@ def has_unseen_error_log():
 		return {
 			"show_alert": True,
 			"message": _("You have unseen {0}").format(
-				'<a href="/desk/List/Error%20Log/List"> Error Logs </a>'
+				f'<a href="/desk/List/Error%20Log/List"> {_("Error Logs")} </a>'
 			),
 		}
 

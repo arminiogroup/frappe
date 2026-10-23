@@ -110,7 +110,7 @@ frappe.ui.BottomSheet = class BottomSheet {
 		this.root = null;
 
 		if (opts.trigger || opts.button) {
-			const button_opts = { label: __("Open"), ...opts.button };
+			const button_opts = { label: __("Open", null, "Access"), ...opts.button };
 			// the trigger's click opens the sheet, so its own onclick would double up
 			delete button_opts.onclick;
 			this.$trigger = opts.trigger ? $(opts.trigger) : frappe.ui.button(button_opts);

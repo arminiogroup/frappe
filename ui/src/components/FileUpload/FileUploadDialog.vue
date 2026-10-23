@@ -54,7 +54,7 @@
 						<p class="truncate text-p-sm text-ink-gray-8">{{ item.name }}</p>
 						<div class="flex items-center gap-1.5 text-xs text-ink-gray-4">
 							<span v-if="item.size != null">{{ formatBytes(item.size) }}</span>
-							<span v-else-if="item.source === 'link'">Web link</span>
+							<span v-else-if="item.source === 'link'">{{ __("Web link") }}</span>
 							<!-- inline progress: single/field uploads surface here, not the tray -->
 							<span v-if="item.status === 'uploading'"
 								>· {{ progressPercent(item) }}%</span
@@ -90,8 +90,8 @@
 							size="xs"
 							variant="ghost"
 							icon="lucide-rotate-cw"
-							tooltip="Retry"
-							aria-label="Retry"
+							:tooltip="__('Retry')"
+							:aria-label="__('Retry')"
 							@click="uploader.retry(item.id)"
 						/>
 						<Button
@@ -99,8 +99,8 @@
 							size="xs"
 							variant="ghost"
 							icon="lucide-crop"
-							tooltip="Crop"
-							aria-label="Crop"
+							:tooltip="__('Crop')"
+							:aria-label="__('Crop')"
 							@click="openCropper(item)"
 						/>
 						<!-- Optimize: image-only (the server's optimizer ignores other
@@ -113,8 +113,10 @@
 							size="xs"
 							variant="ghost"
 							:icon="item.optimize ? 'lucide-sparkles' : 'lucide-image-down'"
-							:tooltip="item.optimize ? 'Optimization on' : 'Optimize image'"
-							:aria-label="item.optimize ? 'Optimization on' : 'Optimize image'"
+							:tooltip="item.optimize ? __('Optimization on') : __('Optimize image')"
+							:aria-label="
+								item.optimize ? __('Optimization on') : __('Optimize image')
+							"
 							:aria-pressed="item.optimize ?? false"
 							@click="uploader.setOptimize(item.id, !item.optimize)"
 						/>
@@ -126,8 +128,8 @@
 							size="xs"
 							variant="ghost"
 							:icon="item.isPrivate ? 'lucide-lock' : 'lucide-globe'"
-							:tooltip="item.isPrivate ? 'Private' : 'Public'"
-							:aria-label="item.isPrivate ? 'Private' : 'Public'"
+							:tooltip="item.isPrivate ? __('Private') : __('Public')"
+							:aria-label="item.isPrivate ? __('Private') : __('Public')"
 							:aria-pressed="item.isPrivate"
 							@click="uploader.setPrivate(item.id, !item.isPrivate)"
 						/>
@@ -135,8 +137,8 @@
 							size="xs"
 							variant="ghost"
 							icon="lucide-x"
-							tooltip="Remove"
-							aria-label="Remove"
+							:tooltip="__('Remove')"
+							:aria-label="__('Remove')"
 							@click="uploader.remove(item.id)"
 						/>
 					</div>
@@ -160,8 +162,8 @@
 					<Button
 						variant="ghost"
 						icon="lucide-arrow-left"
-						tooltip="Back"
-						aria-label="Back"
+						:tooltip="__('Back')"
+						:aria-label="__('Back')"
 						@click="closeLink"
 					/>
 					<TextInput
@@ -180,7 +182,7 @@
 					</TextInput>
 					<Button
 						variant="solid"
-						label="Add"
+						:label="__('Add')"
 						:disabled="!linkUrl.trim()"
 						@click="submitLink"
 					/>
@@ -192,7 +194,7 @@
 						class="mb-1.5"
 						variant="ghost"
 						icon-left="lucide-arrow-left"
-						label="Back"
+						:label="__('Back')"
 						@click="cameraMode = false"
 					/>
 					<CameraSource @files="onCameraFiles" />
@@ -205,7 +207,7 @@
 						v-if="uploader.items.length"
 						class="px-2 pb-1 pt-0.5 text-xs font-medium text-ink-gray-5"
 					>
-						Add more
+						{{ __("Add more") }}
 					</p>
 					<button
 						v-for="option in menu"
@@ -233,12 +235,12 @@
 			>
 				<p v-if="showDropHint" class="flex items-center gap-1.5 text-xs text-ink-gray-4">
 					<span class="lucide-cloud-upload size-3.5" aria-hidden="true" />
-					or drop files to upload
+					{{ __("or drop files to upload") }}
 				</p>
 				<div v-if="uploader.items.length" class="ml-auto flex items-center gap-2">
 					<Button
 						variant="ghost"
-						label="Cancel"
+						:label="__('Cancel')"
 						:disabled="uploader.isUploading.value"
 						@click="onCancel"
 					/>
@@ -258,7 +260,7 @@
 				class="absolute inset-1 z-10 flex flex-col items-center justify-center gap-1.5 rounded-6 border-2 border-dashed border-outline-gray-4 bg-surface-gray-1/90 text-ink-gray-7"
 			>
 				<span class="lucide-cloud-upload size-7" />
-				<p class="text-p-sm font-medium">Drop files here</p>
+				<p class="text-p-sm font-medium">{{ __("Drop files here") }}</p>
 			</div>
 		</div>
 	</Dialog>
@@ -274,7 +276,7 @@
 	/>
 
 	<!-- Crop dialog (cropper lazily loaded) — opens over the popover. -->
-	<Dialog v-model:open="cropOpen" title="Crop image" size="4xl">
+	<Dialog v-model:open="cropOpen" :title="__('Crop image')" size="4xl">
 		<ImageCropper
 			v-if="cropOpen && cropTarget?.file"
 			:file="cropTarget.file"
@@ -286,6 +288,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 // The upload dialog, rewritten as a Notion-style add-menu (a quiet `bare`
 // popover) instead of the old source tabs. Top-to-bottom: a staged-files tray
 // (per-item crop / privacy / remove / retry, with bulk Optimize + Set-all
@@ -319,7 +322,6 @@ const props = withDefaults(defineProps<FileUploadDialogProps>(), {
 	imageOnly: false,
 	crop: false,
 	title: "Upload",
-	trayLabel: "Uploading files",
 });
 
 // How progress is surfaced. When the caller doesn't specify, multi-file uploads
@@ -357,15 +359,15 @@ const uploader = useUploader({
 // Friendlier, action-phrased labels for the popover (the registry's terse
 // "Device"/"Link"/"Camera" read as nouns). Availability (e.g. camera gating)
 // still comes from getUploadSources().
-const menuMeta: Record<string, { label: string; icon: string }> = {
-	device: { label: "Upload from device", icon: "lucide-upload" },
-	link: { label: "Embed a link", icon: "lucide-link" },
-	camera: { label: "Take a photo", icon: "lucide-camera" },
-};
+const menuMeta = computed<Record<string, { label: string; icon: string }>>(() => ({
+	device: { label: __("Upload from device"), icon: "lucide-upload" },
+	link: { label: __("Embed a link"), icon: "lucide-link" },
+	camera: { label: __("Take a photo"), icon: "lucide-camera" },
+}));
 const menu = computed(() =>
 	getUploadSources().map((source) => ({
 		key: source.key,
-		...(menuMeta[source.key] ?? { label: source.label, icon: source.icon }),
+		...(menuMeta.value[source.key] ?? { label: source.label, icon: source.icon }),
 	}))
 );
 
@@ -425,25 +427,25 @@ const accept = computed(() => {
 
 const countLabel = computed(() => {
 	const count = uploader.items.length;
-	return `${count} file${count === 1 ? "" : "s"}`;
+	return count === 1 ? __("{0} file", [count]) : __("{0} files", [count]);
 });
 
 const uploadLabel = computed(() => {
 	const count = uploader.items.length;
-	return count > 1 ? `Upload ${count} files` : "Upload";
+	return count > 1 ? __("Upload {0} files", [count]) : __("Upload");
 });
 
 // Bulk privacy: the header control reflects the aggregate and flips every file.
 const allPrivate = computed(() => uploader.items.every((item) => item.isPrivate));
 const allPublic = computed(() => uploader.items.every((item) => !item.isPrivate));
 const bulkPrivacyLabel = computed(() =>
-	allPrivate.value ? "All private" : allPublic.value ? "All public" : "Mixed"
+	allPrivate.value ? __("All private") : allPublic.value ? __("All public") : __("Mixed")
 );
 const bulkPrivacyIcon = computed(() => (allPublic.value ? "lucide-globe" : "lucide-lock"));
-const bulkPrivacyOptions = [
-	{ label: "Make all private", onClick: () => uploader.setAllPrivate(true) },
-	{ label: "Make all public", onClick: () => uploader.setAllPrivate(false) },
-];
+const bulkPrivacyOptions = computed(() => [
+	{ label: __("Make all private"), onClick: () => uploader.setAllPrivate(true) },
+	{ label: __("Make all public"), onClick: () => uploader.setAllPrivate(false) },
+]);
 
 function isImage(item: UploadItem): boolean {
 	return Boolean(item.file?.type.startsWith("image/"));
@@ -639,7 +641,7 @@ async function doCommit() {
 	// closing must not wait for bytes.
 	if (effectiveProgressMode.value === "tray") {
 		if (trayBatchId == null) {
-			trayBatchId = pushTrayBatch(props.trayLabel, uploader.items, {
+			trayBatchId = pushTrayBatch(props.trayLabel ?? __("Uploading files"), uploader.items, {
 				cancel: uploader.cancel,
 				// Reset the row for immediate feedback, then re-commit just that
 				// row; the pass relays the retried result through `committed`.

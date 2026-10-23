@@ -57,12 +57,12 @@
   {
    "fieldname": "items_section",
    "fieldtype": "Section Break",
-   "label": "Items"
+   "label": "Sidebar Items"
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Items",
+   "label": "Sidebar Items",
    "options": "Sidebar Item"
   },
   {
@@ -91,9 +91,8 @@
   }
  ],
  "grid_page_length": 50,
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-27 14:57:28.772713",
+ "modified": "2026-10-21 00:48:48.452756",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Sidebar",

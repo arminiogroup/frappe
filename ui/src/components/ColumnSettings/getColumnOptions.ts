@@ -1,3 +1,5 @@
+import { translate as __ } from "../../utils/translate";
+import { translateDocFieldText } from "../../utils/translateDocField";
 import type { RawMetaField } from "../FormLayout/types";
 import type { ColumnOption, SyntheticColumn } from "./types";
 
@@ -18,13 +20,15 @@ const NON_COLUMN_FIELDTYPES = new Set([
 
 /** Standard fields every doctype can show as a column, appended after the meta
  *  fields. */
-const STANDARD_FIELDS: ReadonlyArray<{ label: string; fieldname: string }> = [
-  { label: "Name", fieldname: "name" },
-  { label: "Last Modified", fieldname: "modified" },
-  { label: "Created On", fieldname: "creation" },
-  { label: "Modified By", fieldname: "modified_by" },
-  { label: "Owner", fieldname: "owner" },
-];
+function standardFields(): ReadonlyArray<{ label: string; fieldname: string }> {
+  return [
+    { label: __("Name"), fieldname: "name" },
+    { label: __("Last Modified"), fieldname: "modified" },
+    { label: __("Created On"), fieldname: "creation" },
+    { label: __("Modified By"), fieldname: "modified_by" },
+    { label: __("Owner"), fieldname: "owner" },
+  ];
+}
 
 const toOption = (label: string, fieldname: string): ColumnOption => ({
   label,
@@ -49,8 +53,10 @@ export function getColumnOptions(
     .filter(
       (f) => !NON_COLUMN_FIELDTYPES.has(f.fieldtype) && f.label && f.fieldname
     )
-    .map((f) => toOption(f.label as string, f.fieldname));
-  const standard = STANDARD_FIELDS.map((f) => toOption(f.label, f.fieldname));
+    .map((f) =>
+      toOption(translateDocFieldText(f, f.label) as string, f.fieldname)
+    );
+  const standard = standardFields().map((f) => toOption(f.label, f.fieldname));
   const declared = synthetic.map((s) => toOption(s.label, s.key));
   return [...fieldOptions, ...standard, ...declared];
 }

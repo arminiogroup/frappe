@@ -566,12 +566,14 @@ class Engine:
 						# Disallow single values (strings, numbers, etc.) directly in the list
 						# unless it's the name IN (...) case handled above.
 						raise ValueError(
-							f"Invalid item type in filter list: {type(filter_item).__name__}. Expected list, tuple, dict, or Criterion."
+							_(
+								"Invalid item type in filter list: {0}. Expected list, tuple, dict, or Criterion."
+							).format(type(filter_item).__name__)
 						)
 			return
 
 		# If filters type is none of the above
-		raise ValueError(f"Unsupported filters type: {type(filters).__name__}")
+		raise ValueError(_("Unsupported filters type: {0}").format(type(filters).__name__))
 
 	def apply_or_filters(
 		self,
@@ -611,7 +613,7 @@ class Engine:
 			case [doctype, field, operator, value, _]:
 				self._apply_filter(field, value, operator, doctype, collect=collect)
 			case _:
-				raise ValueError(f"Unknown filter format: {filter}")
+				raise ValueError(_("Unknown filter format: {0}").format(filter))
 
 	def apply_dict_filters(self, filters: dict[str, FilterValue | list], collect: list | None = None):
 		for field, value in filters.items():
@@ -1237,7 +1239,7 @@ class Engine:
 					initial_field_list.append(item)
 
 		else:
-			frappe.throw(_("Fields must be a string, list, tuple, pypika Field, or pypika Function"))
+			frappe.throw(_("Fields must be a string, list, tuple, set, or pypika Term"))
 
 		_fields = []
 		# Iterate through the list where each item could be a single field, criterion, or a comma-separated string
@@ -1285,10 +1287,11 @@ class Engine:
 							frappe.ValidationError,
 						)
 
-					# Ensure child_fields_list is a list or tuple
 					if not isinstance(child_fields_list, list | tuple | set):
 						frappe.throw(
-							_("Child query fields for '{0}' must be a list or tuple.").format(child_field)
+							_("Child query fields for '{0}' must be a list, tuple, or set.").format(
+								child_field
+							)
 						)
 					_parsed_fields.append(ChildQuery(child_field, list(child_fields_list), self.doctype))
 				# Return list as a dict entry might represent multiple child queries (though unlikely)
@@ -1595,7 +1598,7 @@ class Engine:
 	def _raise_permission_error(self, doctype=None):
 		frappe.throw(
 			title=_("Permission Error"),
-			msg=_("Insufficient Permission for {0}").format(frappe.bold(doctype or self.doctype)),
+			msg=_("Insufficient Permission for {0}").format(frappe.bold(_(doctype or self.doctype))),
 			exc=frappe.PermissionError,
 		)
 
@@ -2523,7 +2526,9 @@ class SQLFunctionParser:
 		operator_keys = [k for k in field_dict.keys() if k.lower() != "as"]
 		return len(operator_keys) == 1 and operator_keys[0] in OPERATOR_MAPPING
 
-	def _extract_dict_components(self, d: dict, valid_keys: dict, error_msg: str) -> tuple:
+	def _extract_dict_components(
+		self, d: dict, valid_keys: dict, *, invalid_format_message: str, unsupported_message: str
+	) -> tuple:
 		"""Extract name, alias, and args from function/operator dict."""
 		name = None
 		alias = None
@@ -2537,10 +2542,10 @@ class SQLFunctionParser:
 				args = value
 
 		if not name:
-			frappe.throw(_("Invalid {0} dictionary format").format(error_msg), frappe.ValidationError)
+			frappe.throw(invalid_format_message, frappe.ValidationError)
 
 		if name not in valid_keys:
-			frappe.throw(_("Unsupported {0}: {1}").format(error_msg, name), frappe.ValidationError)
+			frappe.throw(unsupported_message.format(name), frappe.ValidationError)
 
 		if alias:
 			self._validate_alias(alias)
@@ -2550,7 +2555,10 @@ class SQLFunctionParser:
 	def parse_function(self, function_dict: dict) -> Field:
 		"""Parse a SQL function dictionary into a pypika function call."""
 		function_name, alias, function_args = self._extract_dict_components(
-			function_dict, FUNCTION_MAPPING, "function or invalid field name"
+			function_dict,
+			FUNCTION_MAPPING,
+			invalid_format_message=_("Invalid SQL function dictionary format"),
+			unsupported_message=_("Unsupported SQL function or invalid field name: {0}"),
 		)
 
 		func_class = FUNCTION_MAPPING[function_name]
@@ -2595,7 +2603,10 @@ class SQLFunctionParser:
 		Example: {"DIV": [1, {"NULLIF": [{"LOCATE": ["'test'", "name"]}, 0]}]}
 		"""
 		operator_name, alias, operator_args = self._extract_dict_components(
-			operator_dict, OPERATOR_MAPPING, "operator"
+			operator_dict,
+			OPERATOR_MAPPING,
+			invalid_format_message=_("Invalid SQL operator dictionary format"),
+			unsupported_message=_("Unsupported SQL operator: {0}"),
 		)
 
 		operator = OPERATOR_MAPPING[operator_name]

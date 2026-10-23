@@ -3,11 +3,11 @@
  * go through `{0}`, since a sentence glued from translated halves only reads in
  * English.
  */
-export function t(message: string, replace?: unknown[]): string {
+export function t(message: string, replace?: unknown[], context?: string): string {
   const translate = (
-    globalThis as { __?: (m: string, r?: unknown[]) => string }
+    globalThis as { __?: (m: string, r?: unknown[], c?: string) => string }
   ).__;
-  if (typeof translate === "function") return translate(message, replace);
+  if (typeof translate === "function") return translate(message, replace, context);
   if (!replace) return message;
   // The fallback substitutes too, or a literal `{0}` is read out on a host with
   // no plugin.

@@ -1,15 +1,31 @@
 import { dayjsLocal } from "frappe-ui";
 import { ref, type Ref } from "vue";
+import { translate as __ } from "../../utils/translate";
+
+type HostDateTime = {
+  str_to_user?: (date: string) => string;
+  prettyDate?: (date: string) => string;
+};
+
+function hostDateTime(): HostDateTime | undefined {
+  return (globalThis as { frappe?: { datetime?: HostDateTime } }).frappe?.datetime;
+}
 
 export const dateTooltipFormat = "ddd, MMM D, YYYY h:mm A";
 
 export function dateFormat(date?: string, format = dateTooltipFormat): string {
   if (!date) return "";
+  const datetime = hostDateTime();
+  if (format === dateTooltipFormat && datetime?.str_to_user) {
+    return datetime.str_to_user(date);
+  }
   return dayjsLocal(date).format(format);
 }
 
 export function timeAgo(date?: string): string {
   if (!date) return "";
+  const datetime = hostDateTime();
+  if (datetime?.prettyDate) return datetime.prettyDate(date);
   return dayjsLocal(date).fromNow();
 }
 
@@ -93,9 +109,11 @@ export function getAssignee(text: string, commentType: string): string | null {
         ];
 
   for (const [template, assigneeIdx] of templates) {
-    const groups = matchFormatTemplate(template, text);
-    if (!groups) continue;
-    return assigneeIdx === null ? null : groups[assigneeIdx] ?? null;
+    for (const localizedTemplate of [__(template), template]) {
+      const groups = matchFormatTemplate(localizedTemplate, text);
+      if (!groups) continue;
+      return assigneeIdx === null ? null : groups[assigneeIdx] ?? null;
+    }
   }
   return null;
 }

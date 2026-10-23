@@ -63,6 +63,7 @@ frappe.ui.get_print_settings = function (
 			label: __("Print Format"),
 			options: "Print Format",
 			default: default_print_format,
+			on_make: setup_report_print_format_names,
 			description: __(
 				"If no Print Format is selected, the default template for this report will be used."
 			),
@@ -141,6 +142,138 @@ frappe.ui.get_print_settings = function (
 		title ? __(title) : __("Print Settings")
 	);
 };
+
+function setup_report_print_format_names(field) {
+	const original = frappe.ui.form.ControlLink.prototype;
+	const primary_match = Symbol("primary Report Print Format match");
+	const context = ":Print Format Name";
+	const report = () => frappe.query_report?.report_name || "";
+	const candidates = () =>
+		Object.keys(frappe._messages)
+			.filter((key) => key.endsWith(context) && frappe._messages[key])
+			.map((key) => key.slice(0, -context.length));
+	const metadata_matches = (name) => {
+		const row = locals[":Print Format"]?.[name];
+		return (
+			report() &&
+			row?.name === name &&
+			row.standard === "Yes" &&
+			!cint(row.disabled) &&
+			row.print_format_for === "Report" &&
+			row.report === report()
+		);
+	};
+	const source = (names) =>
+		JSON.stringify([
+			frappe.boot.lang,
+			report(),
+			names.map((name) => {
+				const row = locals[":Print Format"]?.[name];
+				return [
+					name,
+					frappe._messages[`${name}${context}`],
+					row
+						? [
+								row.name,
+								row.standard,
+								cint(row.disabled),
+								row.report,
+								row.print_format_for,
+						  ]
+						: null,
+				];
+			}),
+		]);
+	const current_choices = () =>
+		field._report_print_source === source(candidates())
+			? field._report_print_choices || []
+			: [];
+	async function load_choices() {
+		const request = (field._report_print_request || 0) + 1;
+		field._report_print_request = request;
+		const names = candidates();
+		const fingerprint = source(names);
+		let choices = [];
+		if (report() && names.length) {
+			const args = field.get_search_args("");
+			args.filters = { ...args.filters, standard: "Yes", name: ["in", names] };
+			args.page_length = names.length;
+			choices = await frappe
+				.call({ method: "frappe.desk.search.search_link", args, no_spinner: true })
+				.then(
+					(response) => response.message,
+					() => []
+				);
+		}
+		if (
+			request !== field._report_print_request ||
+			fingerprint !== source(candidates()) ||
+			!field.input.isConnected
+		)
+			return false;
+		field._report_print_choices = choices;
+		field._report_print_source = fingerprint;
+		const result_fingerprint = JSON.stringify([fingerprint, choices.map((row) => row.value)]);
+		if (result_fingerprint !== field._report_print_fingerprint) {
+			field.$input.cache = {};
+			field._report_print_fingerprint = result_fingerprint;
+		}
+		return true;
+	}
+	Object.assign(field, {
+		get_translated(value) {
+			const eligible = locals[":Print Format"]?.[value]
+				? metadata_matches(value)
+				: current_choices().some((row) => row.value === value);
+			return eligible && frappe._messages[`${value}${context}`]
+				? frappe._messages[`${value}${context}`]
+				: value;
+		},
+		async on_input(event) {
+			const term = event ? event.target.value : this.$input.val();
+			if ((await load_choices()) && this.$input.val() === term && this.$input.is(":focus")) {
+				return original.on_input.call(this, { target: { value: term } });
+			}
+		},
+		merge_duplicates(results) {
+			const primary_names = new Set(results.map((row) => row.value));
+			const primary = results.map((row) => ({ ...row, [primary_match]: true }));
+			const additional = current_choices()
+				.filter((row) => !primary_names.has(row.value))
+				.map((row) => ({ ...row }));
+			return original.merge_duplicates.call(this, [...primary, ...additional]).map((row) => {
+				const label = this.get_translated(row.label || row.value);
+				if (label !== (row.label || row.value))
+					row.html = `<strong>${frappe.utils.escape_html(
+						label
+					)}</strong><br><span class="small">${frappe.utils.escape_html(
+						row.value
+					)}</span>`;
+				return row;
+			});
+		},
+	});
+	field.awesomplete.filter = (item, input) => {
+		const row = field.awesomplete.get_item(item.value);
+		return (
+			row.action ||
+			row[primary_match] ||
+			!input ||
+			field.input_matches_item(input.toLowerCase(), row)
+		);
+	};
+	field._debounced_input_handler.cancel();
+	field.$input.off("input", field._debounced_input_handler);
+	field._debounced_input_handler = frappe.utils.debounce(field.on_input.bind(field), 500);
+	field.$input.on("input", field._debounced_input_handler);
+	if (field.df.default) {
+		const initial_value = field.df.default;
+		load_choices().then((current) => {
+			if (current && field.value === initial_value && field.$input.val() === initial_value)
+				field.set_formatted_input(initial_value);
+		});
+	}
+}
 
 // qz tray connection wrapper
 //  - allows active and inactive connections to resolve regardless

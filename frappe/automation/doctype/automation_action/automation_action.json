@@ -79,13 +79,13 @@
    "depends_on": "parent_step",
    "fieldname": "branch",
    "fieldtype": "Select",
-   "label": "Branch",
+   "label": "Conditional Branch",
    "options": "\nIf\nElse"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-08-17 01:35:11.457428",
+ "modified": "2026-10-21 00:41:41.750351",
  "modified_by": "Administrator",
  "module": "Automation",
  "name": "Automation Action",

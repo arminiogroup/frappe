@@ -43,7 +43,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 			{
 				fieldtype: "Button",
 				fieldname: "more_btn",
-				label: __("More"),
+				label: __("More", null, "Pagination"),
 				click: show_next_page.bind(this),
 			},
 		];
@@ -70,7 +70,7 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 				fieldtype: "Button",
 				fieldname: "more_child_btn",
 				hidden: 1,
-				label: __("More"),
+				label: __("More", null, "Pagination"),
 				click: show_more_child_results.bind(this),
 			});
 		}
@@ -84,7 +84,8 @@ frappe.ui.form.MultiSelectDialog = class MultiSelectDialog {
 			title: title,
 			fields: this.fields,
 			size: this.size,
-			primary_action_label: this.primary_action_label || __("Get Items"),
+			primary_action_label:
+				this.primary_action_label || __("Get Items", null, "MultiSelectDialog"),
 			secondary_action_label: __("Make {0}", [__(this.doctype)]),
 			primary_action: (data_values) => {
 				let filters_data = this.get_custom_filters();

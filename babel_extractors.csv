@@ -1,3 +1,4 @@
+frappe/geo/country_info.json,frappe.gettext.extractors.country_info.extract
 **/hooks.py,frappe.gettext.extractors.navbar.extract
 **/doctype/*/list_filter/*.json,frappe.gettext.extractors.list_filter.extract
 **/doctype/*/kanban_board/*.json,frappe.gettext.extractors.kanban_board.extract
@@ -9,11 +10,18 @@
 **/web_form/*/*.json,frappe.gettext.extractors.web_form.extract
 **/onboarding_step/*/*.json,frappe.gettext.extractors.onboarding_step.extract
 **/module_onboarding/*/*.json,frappe.gettext.extractors.module_onboarding.extract
+**/dashboard_chart/*/*.json,frappe.gettext.extractors.dashboard_chart.extract
+**/print_format/*/*.json,frappe.gettext.extractors.print_format.extract
 **/report/*/*.json,frappe.gettext.extractors.report.extract
 **.py,frappe.gettext.extractors.python.extract
 **/templates/**.js,frappe.gettext.extractors.html_template.extract
 **.js,frappe.gettext.extractors.javascript.extract
 **.html,frappe.gettext.extractors.html_template.extract
 **.vue,frappe.gettext.extractors.html_template.extract
+ui/src/**/tests/**,ignore
+ui/src/**/stories/**,ignore
+ui/src/**.test.ts,ignore
+ui/src/**.d.ts,ignore
+ui/src/**.ts,frappe.gettext.extractors.javascript.extract_typescript
 **/custom/*.json,frappe.gettext.extractors.customization.extract
 **/fixtures/custom_field.json,frappe.gettext.extractors.custom_field.extract

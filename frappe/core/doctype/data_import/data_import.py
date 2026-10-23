@@ -166,19 +166,19 @@ class DataImport(Document):
 
 	def validate_doctype(self):
 		if self.reference_doctype in BLOCKED_DOCTYPES:
-			frappe.throw(_("Importing {0} is not allowed.").format(self.reference_doctype))
+			frappe.throw(_("Importing {0} is not allowed.").format(_(self.reference_doctype)))
 
 		meta = frappe.get_meta(self.reference_doctype)
 		if not cint(meta.allow_import):
 			frappe.throw(
 				_("Data Import is not allowed for {0}. Enable 'Allow Import' in DocType settings.").format(
-					self.reference_doctype
+					_(self.reference_doctype)
 				)
 			)
 
 		if not frappe.has_permission(self.reference_doctype, "import"):
 			frappe.throw(
-				_("You do not have import permission for {0}").format(self.reference_doctype),
+				_("You do not have import permission for {0}").format(_(self.reference_doctype)),
 				frappe.PermissionError,
 			)
 

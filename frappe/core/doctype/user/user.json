@@ -504,7 +504,7 @@
   {
    "bold": 1,
    "default": "System User",
-   "description": "If the user has any role checked, then the user becomes a \"System User\". \"System User\" has access to the desktop",
+   "description": "For standard user types, the user becomes a System User if at least one assigned role has Desk Access enabled; otherwise, the user becomes a Website User. System Users can access Desk.",
    "fieldname": "user_type",
    "fieldtype": "Link",
    "in_import_template": 1,
@@ -952,7 +952,7 @@
   }
  ],
  "make_attachments_public": 1,
- "modified": "2026-10-01 00:45:05.600707",
+ "modified": "2026-10-21 04:52:55.238723",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",

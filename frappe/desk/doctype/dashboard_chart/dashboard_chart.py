@@ -223,7 +223,7 @@ def get_chart_config(chart, filters, timespan, timegrain, from_date, to_date):
 		],
 		# each period's first day, so a chart can place it on a time axis
 		"dates": [str(get_period_beginning(r[0], timegrain)) for r in result],
-		"datasets": [{"name": _(chart.name), "values": [r[1] for r in result]}],
+		"datasets": [{"name": _(chart.name, context="Dashboard Chart"), "values": [r[1] for r in result]}],
 	}
 
 
@@ -295,7 +295,9 @@ def get_group_by_chart_config(chart, filters) -> dict | None:
 		)
 		return {
 			"labels": [item.name or empty_label for item in data],
-			"datasets": [{"name": _(chart.name), "values": [item["count"] for item in data]}],
+			"datasets": [
+				{"name": _(chart.name, context="Dashboard Chart"), "values": [item["count"] for item in data]}
+			],
 		}
 	return None
 

@@ -14,7 +14,7 @@ function get_version_timeline_content(version_doc, frm) {
 	let updater_reference_link = null;
 	let updater_reference = data.updater_reference;
 	if (!$.isEmptyObject(updater_reference)) {
-		let label = updater_reference.label || __("via {0}", [updater_reference.doctype]);
+		let label = updater_reference.label || __("via {0}", [__(updater_reference.doctype)]);
 		let { doctype, docname } = updater_reference;
 		if (doctype && docname) {
 			updater_reference_link = frappe.utils.get_form_link(doctype, docname, true, label);
@@ -59,7 +59,7 @@ function get_version_timeline_content(version_doc, frm) {
 						? get_user_message(
 								version_doc.owner,
 								__(
-									"You cancelled this document {1}",
+									"You cancelled this document {0}",
 									[updater_reference_link],
 									"Form timeline"
 								),

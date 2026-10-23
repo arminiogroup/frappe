@@ -1,3 +1,4 @@
+import { translate as __ } from "../../utils/translate";
 import type { Filter, FilterField, FilterOperator, FilterValue } from "./types";
 
 /** An operator choice offered for a field, ready for a Select control. */
@@ -22,54 +23,6 @@ const op = (value: FilterOperator, label: string): OperatorOption => ({
   value,
 });
 
-const EQUALS = op("equals", "Equals");
-const NOT_EQUALS = op("not equals", "Not equals");
-const LIKE = op("like", "Like");
-const NOT_LIKE = op("not like", "Not like");
-const IN = op("in", "In");
-const NOT_IN = op("not in", "Not in");
-const IS = op("is", "Is");
-
-const STRING_OPERATORS = [EQUALS, NOT_EQUALS, LIKE, NOT_LIKE, IN, NOT_IN, IS];
-const NUMBER_OPERATORS = [
-  EQUALS,
-  NOT_EQUALS,
-  LIKE,
-  NOT_LIKE,
-  IN,
-  NOT_IN,
-  IS,
-  op("<", "<"),
-  op(">", ">"),
-  op("<=", "<="),
-  op(">=", ">="),
-];
-const SELECT_OPERATORS = [EQUALS, NOT_EQUALS, IN, NOT_IN, IS];
-const LINK_OPERATORS = [EQUALS, NOT_EQUALS, LIKE, NOT_LIKE, IN, NOT_IN, IS];
-const CHECK_OPERATORS = [EQUALS];
-const DURATION_OPERATORS = [LIKE, NOT_LIKE, IN, NOT_IN, IS];
-const DATE_OPERATORS = [
-  EQUALS,
-  NOT_EQUALS,
-  IS,
-  op(">", ">"),
-  op("<", "<"),
-  op(">=", ">="),
-  op("<=", "<="),
-  op("between", "Between"),
-  op("timespan", "Timespan"),
-];
-const RATING_OPERATORS = [
-  EQUALS,
-  NOT_EQUALS,
-  op(">", "Greater than"),
-  op("<", "Less than"),
-  op(">=", "Greater than or equal to"),
-  op("<=", "Less than or equal to"),
-  IS,
-];
-const ASSIGN_OPERATORS = [LIKE, NOT_LIKE, IS];
-
 /**
  * The operators a field offers: each fieldtype maps to one operator set, and
  * the `_assign` field overrides to like/not like/is regardless of type.
@@ -78,6 +31,54 @@ export function getOperators(
   fieldtype: string,
   fieldname = ""
 ): OperatorOption[] {
+  const EQUALS = op("equals", __("Equals", [], "Filter Operator"));
+  const NOT_EQUALS = op("not equals", __("Not equals", [], "Filter Operator"));
+  const LIKE = op("like", __("Like", [], "Filter Operator"));
+  const NOT_LIKE = op("not like", __("Not like", [], "Filter Operator"));
+  const IN = op("in", __("In", [], "Filter Operator"));
+  const NOT_IN = op("not in", __("Not in", [], "Filter Operator"));
+  const IS = op("is", __("Is", [], "Filter Operator"));
+
+  const STRING_OPERATORS = [EQUALS, NOT_EQUALS, LIKE, NOT_LIKE, IN, NOT_IN, IS];
+  const NUMBER_OPERATORS = [
+    EQUALS,
+    NOT_EQUALS,
+    LIKE,
+    NOT_LIKE,
+    IN,
+    NOT_IN,
+    IS,
+    op("<", "<"),
+    op(">", ">"),
+    op("<=", "<="),
+    op(">=", ">="),
+  ];
+  const SELECT_OPERATORS = [EQUALS, NOT_EQUALS, IN, NOT_IN, IS];
+  const LINK_OPERATORS = [EQUALS, NOT_EQUALS, LIKE, NOT_LIKE, IN, NOT_IN, IS];
+  const CHECK_OPERATORS = [EQUALS];
+  const DURATION_OPERATORS = [LIKE, NOT_LIKE, IN, NOT_IN, IS];
+  const DATE_OPERATORS = [
+    EQUALS,
+    NOT_EQUALS,
+    IS,
+    op(">", ">"),
+    op("<", "<"),
+    op(">=", ">="),
+    op("<=", "<="),
+    op("between", __("Between", [], "Filter Operator")),
+    op("timespan", __("Timespan", [], "Filter Operator")),
+  ];
+  const RATING_OPERATORS = [
+    EQUALS,
+    NOT_EQUALS,
+    op(">", __("Greater than", [], "Filter Operator")),
+    op("<", __("Less than", [], "Filter Operator")),
+    op(">=", __("Greater than or equal to", [], "Filter Operator")),
+    op("<=", __("Less than or equal to", [], "Filter Operator")),
+    IS,
+  ];
+  const ASSIGN_OPERATORS = [LIKE, NOT_LIKE, IS];
+
   if (fieldname === "_assign") return [...ASSIGN_OPERATORS];
   if (STRING_TYPES.includes(fieldtype)) return [...STRING_OPERATORS];
   if (NUMBER_TYPES.includes(fieldtype)) return [...NUMBER_OPERATORS];

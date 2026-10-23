@@ -2,9 +2,46 @@
 # License: MIT. See LICENSE
 
 import json
+from unittest.mock import patch
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.automation.doctype.automation_flow.automation_flow import AutomationFlow
+from frappe.automation_engine.actions.core import SetFieldValue
+from frappe.tests import IntegrationTestCase, UnitTestCase
+
+
+class TestAutomationMessages(UnitTestCase):
+	def setUp(self):
+		self.addCleanup(frappe.set_user, frappe.session.user)
+		frappe.set_user("translator@example.com")
+		self.addCleanup(setattr, frappe.local, "lang", frappe.local.lang)
+		frappe.local.lang = "it"
+
+	def test_context_errors_translate_action_and_trigger_labels(self):
+		action = SetFieldValue()
+		action.supported_trigger_types = ["Manual"]
+		doc = frappe._dict(trigger_type="Scheduled", document_type=None)
+		translations = {"Set Field Value": "Imposta valore del campo", "Scheduled": "Pianificato"}
+		with patch("frappe.translate.get_all_translations", return_value=translations):
+			with self.assertRaises(frappe.ValidationError) as error:
+				AutomationFlow.validate_action_context(doc, action)
+			self.assertIn("Imposta valore del campo", str(error.exception))
+			doc.document_type = "ToDo"
+			with self.assertRaises(frappe.ValidationError) as error:
+				AutomationFlow.validate_action_context(doc, action)
+			self.assertIn("Imposta valore del campo", str(error.exception))
+			self.assertIn("Pianificato", str(error.exception))
+		self.assertEqual(action.label, "Set Field Value")
+		self.assertEqual(doc.trigger_type, "Scheduled")
+		self.assertEqual(doc.document_type, "ToDo")
+
+	def test_missing_document_error_translates_the_trigger_label(self):
+		doc = frappe._dict(trigger_type="Doc Created", document_type=None)
+		with patch("frappe.translate.get_all_translations", return_value={"Doc Created": "Documento creato"}):
+			with self.assertRaises(frappe.ValidationError) as error:
+				AutomationFlow.validate_trigger_config(doc)
+		self.assertIn("Documento creato", str(error.exception))
+		self.assertEqual(doc.trigger_type, "Doc Created")
 
 
 def set_field(field, value):

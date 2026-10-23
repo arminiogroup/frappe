@@ -1252,7 +1252,9 @@ class FilterArea {
 
 					return {
 						fieldtype: fieldtype,
-						label: __(df.label, null, df.parent),
+						label: df.label,
+						parent: df.parent || this.list_view.doctype,
+						context: df.context,
 						options: options,
 						fieldname: df.fieldname,
 						condition: condition,
@@ -1332,7 +1334,7 @@ class FilterArea {
 				</button>
 				<ul class="dropdown-menu match-type-dropdown-menu dropdown-menu-right">
 					<li class="dropdown-item" data-match-type="=">${__("Equals")}</li>
-					<li class="dropdown-item" data-match-type="like">${__("Like")}</li>
+					<li class="dropdown-item" data-match-type="like">${__("Like", null, "Filter Operator")}</li>
 				</ul>
 			</div>
 		`);

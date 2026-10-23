@@ -36,6 +36,9 @@ export type FilterValue = string | boolean | string[];
  *  mirrors CRM's `get_filterable_fields` rows (`value === fieldname`) so existing
  *  hosts drop in unchanged. See CONTEXT.md ("Field Options"). */
 export interface FilterField {
+  /** Source DocType, absent on host-supplied field declarations. */
+  parent?: string;
+  context?: string;
   label: string;
   value: string;
   fieldname: string;

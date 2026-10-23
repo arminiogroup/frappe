@@ -4,6 +4,8 @@
 import time
 from contextlib import contextmanager
 
+from babel.dates import format_timedelta
+
 import frappe
 from frappe import _
 from frappe.automation_engine import settings
@@ -306,7 +308,15 @@ def _begin_wait(step, context, pos):
 
 
 def _simulated_wait(params) -> str:
-	return _("Waited {0} {1} (simulated)").format(cint(params.get("value")), params.get("unit") or "Minutes")
+	unit = (params.get("unit") or "Minutes").lower().removesuffix("s")
+	seconds = _wait_seconds(params)
+	duration = format_timedelta(
+		seconds,
+		granularity=unit,
+		threshold=float("inf"),
+		locale=(frappe.local.lang or "en").replace("-", "_"),
+	)
+	return _("Waited {0} (simulated)").format(f"-{duration}" if seconds < 0 else duration)
 
 
 def _begin_event_wait(step, context, pos):

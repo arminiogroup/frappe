@@ -8,7 +8,7 @@
 				class="pfb-space-grip"
 				:class="['pfb-space-grip-' + side, { active: active === side }]"
 				:style="grip_style[side]"
-				:title="__('Drag to change {0} {1}', [side, type])"
+				:title="spacing_titles[type][side]"
 				@pointerdown.stop.prevent="start(side, $event)"
 			>
 				<span v-if="active === side" class="pfb-space-tip">{{ box[side] || 0 }}</span>
@@ -26,6 +26,20 @@ const props = defineProps({
 	type: { type: String, default: "padding" }, // "padding" (inside) | "margin" (outside)
 });
 const sides = ["top", "right", "bottom", "left"];
+const spacing_titles = {
+	margin: {
+		top: __("Drag to change top margin"),
+		right: __("Drag to change right margin"),
+		bottom: __("Drag to change bottom margin"),
+		left: __("Drag to change left margin"),
+	},
+	padding: {
+		top: __("Drag to change top padding"),
+		right: __("Drag to change right padding"),
+		bottom: __("Drag to change bottom padding"),
+		left: __("Drag to change left padding"),
+	},
+};
 const active = ref(null);
 
 // margin sits outside the border, so its bands/handles are offset the other way

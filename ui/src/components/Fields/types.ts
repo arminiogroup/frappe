@@ -12,6 +12,9 @@ import type { FieldNode, FormLayoutSchema } from "../FormLayout/types";
 export interface FieldMeta {
   fieldname: string;
   fieldtype: string;
+  /** Source DocType, absent on host-supplied presentation fields. */
+  parent?: string;
+  context?: string;
   label?: string;
   /** Target doctype for `Link` fields, or child doctype for `Table` (Frappe `options`). */
   options?: string;

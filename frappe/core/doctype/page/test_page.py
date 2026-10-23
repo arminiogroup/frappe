@@ -5,10 +5,35 @@ import os
 import re
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.core.doctype.page.page import Page
+from frappe.tests import IntegrationTestCase, UnitTestCase
+
+
+class TestPageMessages(UnitTestCase):
+	def test_island_conversion_warning_names_the_existing_script_once(self):
+		self.addCleanup(frappe.set_user, frappe.session.user)
+		frappe.set_user("translator@example.com")
+		with TemporaryDirectory() as folder:
+			Path(folder, "demo_page.js").write_text("")
+			page = frappe._dict(
+				name="demo-page",
+				type="Frappe UI",
+				standard="Yes",
+				island=None,
+				is_new=lambda: False,
+				get_folder_path=lambda: folder,
+			)
+			with (
+				patch("frappe.msgprint") as message,
+				patch("frappe.translate.get_all_translations", return_value={}),
+			):
+				Page.validate_island(page)
+		self.assertIn("demo_page.js", message.call_args.args[0])
+		self.assertNotIn(".js.js", message.call_args.args[0])
 
 
 class TestPage(IntegrationTestCase):

@@ -614,7 +614,7 @@ def get_context(context):
 			if not mobile_no:
 				doc.log_error(
 					_("Notification: document {0} has no {1} number set (field: {2})").format(
-						field, doc.name, option, field
+						doc.name, _(option), field
 					)
 				)
 		# but on user & customer it's expected to be set on the proper field

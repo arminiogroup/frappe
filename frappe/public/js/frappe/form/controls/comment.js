@@ -19,7 +19,7 @@ frappe.ui.form.ControlComment = class ControlComment extends frappe.ui.form.Cont
 					<div class="frappe-control col"></div>
 				</div>
 				<button class="btn hidden btn-comment btn-xs" style="margin-left:48px;">
-					${__("Comment")}
+					${__("Comment", null, "Comment Action")}
 				</button>
 			</div>
 		`)

@@ -1,8 +1,62 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 import { getFilterableFields, pickFilterFields } from "../getFilterableFields";
 import type { RawMetaField } from "../../FormLayout/types";
 
 describe("getFilterableFields", () => {
+  it("labels people who liked the record separately from the reaction", () => {
+    const previous = (globalThis as { __?: unknown }).__;
+    const jquery = {};
+    const host = {
+      frappe: { _messages: { Like: "Mi piace", "Liked By": "Piaciuto a" } },
+      window: {} as {
+        __?: (message: string, args?: unknown[], context?: string) => string;
+      },
+      $: jquery,
+      jQuery: jquery,
+    };
+    runInNewContext(
+      readFileSync(
+        new URL(
+          "../../../../../frappe/public/js/frappe/format.js",
+          import.meta.url
+        ),
+        "utf8"
+      ),
+      host
+    );
+    runInNewContext(
+      readFileSync(
+        new URL(
+          "../../../../../frappe/public/js/frappe/translate.js",
+          import.meta.url
+        ),
+        "utf8"
+      ),
+      host
+    );
+    Object.assign(globalThis, { __: host.window.__ });
+    try {
+      const result = getFilterableFields([], "Task");
+      expect(result.find((field) => field.fieldname === "_liked_by")).toEqual({
+        label: "Piaciuto a",
+        value: "_liked_by",
+        fieldname: "_liked_by",
+        fieldtype: "Data",
+        options: undefined,
+      });
+      const supplied = {
+        fieldname: "_liked_by",
+        fieldtype: "Data" as const,
+        label: "Like",
+      };
+      expect(pickFilterFields(result, [supplied])[0]).toMatchObject(supplied);
+    } finally {
+      if (previous === undefined) delete (globalThis as { __?: unknown }).__;
+      else Object.assign(globalThis, { __: previous });
+    }
+  });
   it("derives a filterable field from Meta, stamping label/value/fieldname", () => {
     const fields: RawMetaField[] = [
       { fieldname: "title", fieldtype: "Data", label: "Title" },

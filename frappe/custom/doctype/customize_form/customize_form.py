@@ -617,14 +617,14 @@ class CustomizeForm(Document):
 			""",
 				as_dict=True,
 			)
-			label = df.label
+			label = _(df.label, context=self.doc_type)
 			links_str = ", ".join(frappe.utils.get_link_to_form(self.doc_type, doc.name) for doc in docs)
 
 			if docs:
 				frappe.throw(
-					_(
-						"Value for field {0} is too long in {1}. Length should be lesser than {2} characters"
-					).format(frappe.bold(label), links_str, frappe.bold(max_length)),
+					_("Value for field {0} is too long in {1}. The maximum length is {2} characters.").format(
+						frappe.bold(label), links_str, frappe.bold(max_length)
+					),
 					title=_("Data Too Long"),
 					is_minimizable=len(docs) > 1,
 				)

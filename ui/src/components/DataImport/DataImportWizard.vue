@@ -47,7 +47,7 @@
 					v-if="startError"
 					class="mb-4"
 					theme="red"
-					:title="t('Import could not start')"
+					:title="__('Import could not start')"
 					:description="startError"
 				/>
 				<Transition
@@ -75,7 +75,7 @@
 				<div>
 					<Button
 						v-if="current !== CONFIG"
-						:label="t('Back')"
+						:label="__('Back')"
 						icon-left="lucide-arrow-left"
 						@click="goTo(current - 1)"
 					/>
@@ -83,24 +83,26 @@
 				<div class="flex items-center gap-2">
 					<Button
 						v-if="showNext"
-						:label="t('Next')"
+						:label="__('Next')"
 						icon-right="lucide-arrow-right"
 						:loading="saving || previewLoading"
-						:loading-text="saving ? t('Saving...') : t('Loading preview...')"
+						:loading-text="saving ? __('Saving...') : __('Loading preview...')"
 						@click="goTo(current + 1)"
 					/>
 					<Button
 						v-if="showImport"
 						variant="solid"
-						:label="rowsToSkip.length ? t('Skip all and import') : t('Import')"
+						:label="rowsToSkip.length ? __('Skip all and import') : __('Import')"
 						:loading="starting || saving || previewLoading"
-						:loading-text="previewLoading ? t('Loading preview...') : t('Starting...')"
+						:loading-text="
+							previewLoading ? __('Loading preview...') : __('Starting...')
+						"
 						@click="skipErrorRowsAndImport"
 					/>
 					<template v-if="current === IMPORT">
 						<Button
 							v-if="running"
-							:label="t('Cancel Import')"
+							:label="__('Cancel Import')"
 							icon-left="lucide-x"
 							@click="confirmingStop = true"
 						/>
@@ -108,16 +110,16 @@
 							<Button
 								v-if="canRetry"
 								:variant="retryFirst ? 'solid' : 'outline'"
-								:label="t('Retry')"
+								:label="__('Retry')"
 								icon-left="lucide-refresh-cw"
 								:loading="retrying"
-								:loading-text="t('Retrying...')"
+								:loading-text="__('Retrying...')"
 								@click="retryImport"
 							/>
 							<Button
 								v-if="onNewImport"
 								:variant="newImportFirst ? 'solid' : 'outline'"
-								:label="t('Start new import')"
+								:label="__('Start new import')"
 								icon-left="lucide-plus"
 								@click="onNewImport(doc.reference_doctype)"
 							/>
@@ -129,13 +131,13 @@
 
 		<Dialog
 			v-model:open="confirmingStop"
-			:title="t('Confirm')"
+			:title="__('Confirm')"
 			:message="
-				t('This will terminate the job immediately and might be dangerous, are you sure?')
+				__('This will terminate the job immediately and might be dangerous, are you sure?')
 			"
 			:actions="[
-				{ label: t('Yes'), variant: 'solid', onClick: stopImport },
-				{ label: t('No'), onClick: ({ close }) => close() },
+				{ label: __('Yes'), variant: 'solid', onClick: stopImport },
+				{ label: __('No'), onClick: ({ close }) => close() },
 			]"
 		/>
 	</div>
@@ -150,7 +152,7 @@ import ConfigStep from "./steps/ConfigStep.vue";
 import FixIssuesStep from "./steps/FixIssuesStep.vue";
 import ImportStep from "./steps/ImportStep.vue";
 import PreviewStep from "./steps/PreviewStep.vue";
-import { t } from "./translate";
+import { t as __ } from "./translate";
 import type { UseDataImport } from "./useDataImport";
 import {
 	CONFIG,
@@ -226,7 +228,7 @@ const stepState = computed(() => ({
 }));
 
 const steps = computed(() =>
-	[t("Config"), t("Map columns"), t("Fix issues"), t("Import")].map((label, index) => ({
+	[__("Config"), __("Map columns"), __("Fix issues"), __("Import")].map((label, index) => ({
 		label,
 		completed: isStepCompleted(index, current.value, doc.value, stepState.value),
 		locked: !canGoToStep(index, current.value, doc.value, stepState.value),
@@ -263,7 +265,7 @@ watch(
 
 watch(blocked, (isBlocked) => {
 	if (!isBlocked) return;
-	toast.error(t("Import could not start. Please resolve the errors in the import file."));
+	toast.error(__("Import could not start. Please resolve the errors in the import file."));
 	current.value = FIX_ISSUES;
 });
 
@@ -318,7 +320,7 @@ async function goTo(target: number) {
 		}
 	}
 	if (target === IMPORT && !importStarted.value) {
-		toast.warning(t("Start the import before opening the Import step."));
+		toast.warning(__("Start the import before opening the Import step."));
 		return;
 	}
 	current.value = target;
@@ -375,7 +377,7 @@ async function stopImport({ close }: { close: () => void }) {
 	const response = await props.dataImport.stop();
 	close();
 	if (response?.status === "not_running")
-		toast.warning(t("Job was not running; status updated."));
-	else toast(t("Job Stopped Successfully"));
+		toast.warning(__("Job was not running; status updated."));
+	else toast(__("Job Stopped Successfully"));
 }
 </script>

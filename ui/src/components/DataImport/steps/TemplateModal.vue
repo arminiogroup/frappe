@@ -1,11 +1,11 @@
 <template>
-	<Dialog v-model:open="open" :title="t('Export Data')" size="2xl">
+	<Dialog v-model:open="open" :title="__('Export Data')" size="2xl">
 		<div class="flex flex-col gap-4">
 			<div class="grid grid-cols-2 gap-4">
-				<Select v-model="fileType" :label="t('File Type')" :options="fileTypeOptions" />
+				<Select v-model="fileType" :label="__('File Type')" :options="fileTypeOptions" />
 				<Select
 					v-model="exportRecords"
-					:label="t('Export Type')"
+					:label="__('Export Type')"
 					:options="exportRecordOptions"
 					:description="countMessage"
 				/>
@@ -15,22 +15,24 @@
 			</div>
 
 			<div class="flex flex-col gap-4 border-t border-outline-gray-2 pt-4">
-				<TextInput v-model="search" size="sm" :placeholder="t('Search')" />
+				<TextInput v-model="search" size="sm" :placeholder="__('Search')" />
 				<div class="flex flex-col gap-2">
 					<div class="text-sm-medium uppercase text-ink-gray-5">
 						{{
-							forInsert ? t("Select Fields To Insert") : t("Select Fields To Update")
+							forInsert
+								? __("Select Fields To Insert")
+								: __("Select Fields To Update")
 						}}
 					</div>
 					<div class="flex gap-2">
-						<Button size="xs" :label="t('Select All')" @click="selectAll" />
+						<Button size="xs" :label="__('Select All')" @click="selectAll" />
 						<Button
 							v-if="forInsert"
 							size="xs"
-							:label="t('Select Mandatory')"
+							:label="__('Select Mandatory')"
 							@click="selectMandatory"
 						/>
-						<Button size="xs" :label="t('Unselect All')" @click="unselectAll" />
+						<Button size="xs" :label="__('Unselect All')" @click="unselectAll" />
 					</div>
 				</div>
 				<div
@@ -90,7 +92,7 @@ import {
 	tableFields,
 	type PickerField,
 } from "../dataImport";
-import { t } from "../translate";
+import { t as __ } from "../translate";
 import type { DataImportType, DocType, ImportProviderSchema } from "../types";
 
 const DOWNLOAD_TEMPLATE_URL = `/api/method/${METHODS}.download_template`;
@@ -133,10 +135,10 @@ const recordCount = ref<number | null>(null);
 
 const fileTypeOptions = ["Excel", "CSV"];
 const exportRecordOptions = computed(() => [
-	{ label: t("All Records"), value: "all" },
-	{ label: t("Filtered Records"), value: "by_filter" },
-	{ label: t("5 Records"), value: "5_records" },
-	{ label: t("Blank Template"), value: "blank_template" },
+	{ label: __("All Records"), value: "all" },
+	{ label: __("Filtered Records"), value: "by_filter" },
+	{ label: __("5 Records"), value: "5_records" },
+	{ label: __("Blank Template"), value: "blank_template" },
 ]);
 
 const getMeta = (doctype: string | null) =>
@@ -150,7 +152,7 @@ const fieldSource = computed(() => {
 		const parentFields = schema.fields || [];
 		groups.push({
 			fieldname: props.doctype,
-			label: t(props.doctype),
+			label: __(props.doctype),
 			doctype: parentFields[0]?.parent || props.doctype,
 		});
 		columns[props.doctype] = parentFields as PickerField[];
@@ -158,18 +160,24 @@ const fieldSource = computed(() => {
 			const childFields = table.fields || [];
 			groups.push({
 				fieldname: table.fieldname,
-				label: t(table.label || table.fieldname),
+				label: __(table.label || table.fieldname),
 				doctype: childFields[0]?.parent || null,
 			});
 			columns[table.fieldname] = childFields as PickerField[];
 		}
 	} else if (getMeta(props.doctype)) {
-		groups.push({ fieldname: props.doctype, label: t(props.doctype), doctype: props.doctype });
+		groups.push({
+			fieldname: props.doctype,
+			label: __(props.doctype),
+			doctype: props.doctype,
+		});
 		columns[props.doctype] = pickerColumns(getMeta(props.doctype));
 		for (const df of tableFields(getMeta(props.doctype))) {
 			const childDoctype = df.options!;
-			const args = [t(df.label || df.fieldname), t(childDoctype)];
-			const label = df.reqd ? t("{0} ({1}) (1 row mandatory)", args) : t("{0} ({1})", args);
+			const args = [__(df.label || df.fieldname), __(childDoctype)];
+			const label = df.reqd
+				? __("{0} ({1}) (1 row mandatory)", args)
+				: __("{0} ({1})", args);
 			groups.push({ fieldname: df.fieldname, label, doctype: childDoctype });
 			columns[df.fieldname] = pickerColumns(getMeta(childDoctype));
 		}
@@ -195,8 +203,8 @@ function groupOptions(group: Group): Option[] {
 		!!autonameField && df.fieldname === autonameField.fieldname;
 
 	const warningTitle = (df: PickerField) => {
-		if (df.depends_on) return t("Depends on: {0}", [df.depends_on]);
-		if (isAutonameField(df)) return t("Autoname: {0}", [autonameField!.label]);
+		if (df.depends_on) return __("Depends on: {0}", [df.depends_on]);
+		if (isAutonameField(df)) return __("Autoname: {0}", [autonameField!.label]);
 		return "";
 	};
 
@@ -210,14 +218,14 @@ function groupOptions(group: Group): Option[] {
 				)
 		)
 		.map((df) => ({
-			label: t(df.label || df.fieldname),
+			label: __(df.label || df.fieldname),
 			value: df.fieldname,
 			danger:
 				(!!df.reqd && forInsert.value) || isAutonameField(df) || df.fieldname === "name",
 			warning: (!!df.depends_on && forInsert.value) || isAutonameField(df),
-			warningTitle: warningTitle(df) || t("Condition based field"),
+			warningTitle: warningTitle(df) || __("Condition based field"),
 			inImportTemplate: !!df.in_import_template,
-			description: `${df.fieldname} ${df.reqd ? t("(Mandatory)") : ""}`,
+			description: `${df.fieldname} ${df.reqd ? __("(Mandatory)") : ""}`,
 		}));
 }
 
@@ -295,15 +303,15 @@ async function updateRecordCount() {
 
 const countMessage = computed(() => {
 	if (recordCount.value === null) return "";
-	if (recordCount.value === 0) return t("No records will be exported");
-	if (recordCount.value === 1) return t("1 record will be exported");
-	return t("{0} records will be exported", [recordCount.value]);
+	if (recordCount.value === 0) return __("No records will be exported");
+	if (recordCount.value === 1) return __("1 record will be exported");
+	return __("{0} records will be exported", [recordCount.value]);
 });
 
 const exportLabel = computed(() => {
-	if (!recordCount.value) return t("Export");
-	if (recordCount.value === 1) return t("Export 1 record");
-	return t("Export {0} records", [recordCount.value]);
+	if (!recordCount.value) return __("Export");
+	if (recordCount.value === 1) return __("Export 1 record");
+	return __("Export {0} records", [recordCount.value]);
 });
 
 function exportRecordsNow() {

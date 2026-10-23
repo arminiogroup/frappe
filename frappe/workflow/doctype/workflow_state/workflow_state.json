@@ -30,7 +30,7 @@
    "label": "Icon"
   },
   {
-   "description": "Style represents the button color: Success - Green, Danger - Red, Inverse - Black, Primary - Dark Blue, Info - Light Blue, Warning - Orange",
+   "description": "Controls the appearance of this workflow state. The exact colors depend on the view and theme.",
    "fieldname": "style",
    "fieldtype": "Select",
    "label": "Style",
@@ -40,7 +40,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2026-07-03 16:04:05.395556",
+ "modified": "2026-10-21 04:58:02.891954",
  "modified_by": "Administrator",
  "module": "Workflow",
  "name": "Workflow State",
@@ -63,6 +63,7 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

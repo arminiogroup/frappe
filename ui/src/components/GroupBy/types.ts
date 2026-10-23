@@ -32,6 +32,8 @@ export interface GroupBySettings {
 
 /** A field the control offers for grouping or aggregating, derived from Meta. */
 export interface GroupByField {
+  parent?: string;
+  context?: string;
   label: string;
   value: string;
   fieldname: string;
@@ -67,6 +69,9 @@ export interface GroupByTableProps {
 
 /** One column of `<GroupByTable>`, as its `#cell` slot receives it. */
 export interface GroupByColumn {
+  /** Source DocType for metadata-owned Select display. */
+  parent?: string;
+  context?: string;
   /** The row key: a fieldname, or an aggregate's `aggregateKey`. */
   key: string;
   /** The id its width and sort are saved under, stable when other columns come and go. */

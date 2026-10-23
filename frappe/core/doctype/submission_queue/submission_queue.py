@@ -122,8 +122,8 @@ class SubmissionQueue(Document):
 			message = _("Action {0} completed successfully on {1} {2}. View it {3}")
 
 		message_replacements = (
-			frappe.bold(action),
-			frappe.bold(str(self.ref_doctype)),
+			frappe.bold(_action_label(action)),
+			frappe.bold(_(str(self.ref_doctype))),
 			frappe.bold(str(self.ref_docname)),
 		)
 
@@ -134,7 +134,7 @@ class SubmissionQueue(Document):
 				{
 					"message": message.format(
 						*message_replacements,
-						f"<a href='/desk/{quote(doctype.lower().replace(' ', '-'))}/{quote(docname)}'><b>here</b></a>",
+						f"<a href='/desk/{quote(doctype.lower().replace(' ', '-'))}/{quote(docname)}'><b>{_('here')}</b></a>",
 					),
 					"alert": True,
 					"indicator": "red" if submission_status == "Failed" else "green",
@@ -146,7 +146,7 @@ class SubmissionQueue(Document):
 				"type": "Alert",
 				"document_type": doctype,
 				"document_name": docname,
-				"subject": message.format(*message_replacements, "here"),
+				"subject": message.format(*message_replacements, _("here")),
 			}
 
 			notify_to = frappe.db.get_value("User", self.enqueued_by, fieldname="email")
@@ -171,7 +171,8 @@ def queue_submission(doc: Document, action: str, alert: bool = True):
 	):
 		frappe.msgprint(
 			_("This document has already been queued for {0}. You can track the progress over {1}.").format(
-				action, f"<a href='/desk/submission-queue/{existing_queue}'><b>here</b></a>"
+				_action_label(action),
+				f"<a href='/desk/submission-queue/{existing_queue}'><b>{_('here')}</b></a>",
 			),
 			indicator="orange",
 			alert=True,
@@ -186,11 +187,15 @@ def queue_submission(doc: Document, action: str, alert: bool = True):
 	if alert:
 		frappe.msgprint(
 			_("Queued for {0}. You can track the progress over {1}.").format(
-				action, f"<a href='/desk/submission-queue/{queue.name}'><b>here</b></a>"
+				_action_label(action), f"<a href='/desk/submission-queue/{queue.name}'><b>{_('here')}</b></a>"
 			),
 			indicator="green",
 			alert=True,
 		)
+
+
+def _action_label(action: str) -> str:
+	return {"submit": _("Submit"), "cancel": _("Cancel"), "update": _("Update")}.get(action.lower(), action)
 
 
 @frappe.whitelist()

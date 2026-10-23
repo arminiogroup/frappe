@@ -7,33 +7,32 @@
 		<div class="flex items-start gap-1.5">
 			<!-- structured text, never v-html -->
 			<ActorText v-if="activity.type === 'log'" :activity="activity" />
-			<!-- one inline flow: the filename follows "attached" and wraps below, untruncated -->
 			<template v-else>
 				<span class="min-w-0 break-words text-ink-gray-5">
-					<span class="font-medium text-ink-gray-8">{{
-						activity?.author?.fullname
-					}}</span>
-					<span>{{
-						activity.data.action === "removed" ? " removed attachment " : " attached "
-					}}</span>
-					<!-- no whitespace between lock and name (condensed away), so they never split lines -->
-					<a
-						v-if="activity.data.fileUrl"
-						:href="activity.data.fileUrl"
-						target="_blank"
-						class="font-medium text-ink-gray-8 hover:text-ink-blue-5"
-					>
-						<LucideLock
-							v-if="activity.data.isPrivate"
-							class="me-1 inline size-3.5 align-[-2.5px]"
-						/>{{ activity.data.fileName }}
-					</a>
-					<span v-else class="font-medium text-ink-gray-5">
-						<LucideLock
-							v-if="activity.data.isPrivate"
-							class="me-1 inline size-3.5 align-[-2.5px]"
-						/>{{ activity.data.fileName }}
-					</span>
+					<template v-for="(part, index) in attachmentParts" :key="index">
+						<span v-if="part === '{0}'" class="font-medium text-ink-gray-8">{{
+							activity?.author?.fullname
+						}}</span>
+						<!-- no whitespace between lock and name (condensed away), so they never split lines -->
+						<a
+							v-else-if="part === '{1}' && activity.data.fileUrl"
+							:href="activity.data.fileUrl"
+							target="_blank"
+							class="font-medium text-ink-gray-8 hover:text-ink-blue-5"
+						>
+							<LucideLock
+								v-if="activity.data.isPrivate"
+								class="me-1 inline size-3.5 align-[-2.5px]"
+							/>{{ activity.data.fileName }}
+						</a>
+						<span v-else-if="part === '{1}'" class="font-medium text-ink-gray-5">
+							<LucideLock
+								v-if="activity.data.isPrivate"
+								class="me-1 inline size-3.5 align-[-2.5px]"
+							/>{{ activity.data.fileName }}
+						</span>
+						<template v-else>{{ part }}</template>
+					</template>
 				</span>
 			</template>
 			<TimeAgo :timestamp="activity.timestamp" class="text-sm ml-auto" />
@@ -42,13 +41,21 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
+import { computed, h } from "vue";
+import { translate as __ } from "../../utils/translate";
 import LucideLock from "~icons/lucide/lock";
 import TimeAgo from "./TimeAgo.vue";
 import type { LogActivity, LogItemProps } from "./types";
 import { splitBold } from "./utils";
 
-defineProps<LogItemProps>();
+const props = defineProps<LogItemProps>();
+
+const attachmentParts = computed(() =>
+	(props.activity.type === "attachment_log" && props.activity.data.action === "removed"
+		? __("{0} removed attachment {1}")
+		: __("{0} attached {1}")
+	).split(/(\{[01]\})/)
+);
 
 // bolds actor + assignee (backend-supplied; no message-template parsing)
 const ActorText = ({ activity }: { activity: LogActivity }) => {

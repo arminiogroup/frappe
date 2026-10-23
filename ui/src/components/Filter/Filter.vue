@@ -27,7 +27,7 @@
 		@update:selectedOption="addFilter"
 	>
 		<template #trigger>
-			<Button label="Filter" iconLeft="lucide-list-filter" />
+			<Button :label="__('Filter')" iconLeft="lucide-list-filter" />
 		</template>
 	</Combobox>
 
@@ -36,7 +36,7 @@
 		<template #trigger="{ close }">
 			<div class="flex items-center">
 				<Button
-					label="Filter"
+					:label="__('Filter')"
 					class="relative rounded-r-none focus-visible:z-10"
 					iconLeft="lucide-list-filter"
 				>
@@ -49,8 +49,8 @@
 					</template>
 				</Button>
 				<Button
-					tooltip="Clear All Filters"
-					aria-label="Clear All Filters"
+					:tooltip="__('Clear All Filters')"
+					:aria-label="__('Clear All Filters')"
 					class="relative rounded-l-none border-l focus-visible:z-10"
 					icon="lucide-x"
 					@click.stop="clearAll(close)"
@@ -69,7 +69,7 @@
 				>
 					<template v-for="(f, i) in model" :key="i">
 						<div class="w-13 pl-2 text-end text-base text-ink-gray-5">
-							{{ i == 0 ? "Where" : "And" }}
+							{{ i == 0 ? __("Where") : __("And") }}
 						</div>
 						<div class="min-w-[140px]">
 							<Combobox
@@ -79,7 +79,7 @@
 								size="md"
 								:modelValue="f.fieldname"
 								:options="allFields"
-								placeholder="Select field"
+								:placeholder="__('Select field')"
 								@update:selectedOption="(o) => updateField(o, i)"
 							/>
 						</div>
@@ -88,7 +88,7 @@
 								class="w-full"
 								:modelValue="f.operator"
 								:options="getOperators(f.field?.fieldtype ?? '', f.fieldname)"
-								placeholder="Equals"
+								:placeholder="__('Equals', [], 'Filter Operator')"
 								@update:modelValue="(v) => updateOperator(v, i)"
 							/>
 						</div>
@@ -105,13 +105,10 @@
 							class="flex"
 							variant="ghost"
 							icon="lucide-x"
-							aria-label="Remove filter"
+							:aria-label="__('Remove filter')"
 							@click="removeFilter(i)"
 						/>
 					</template>
-				</div>
-				<div v-else class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5">
-					Empty - Choose a field to filter by
 				</div>
 				<div class="flex items-center justify-between gap-2">
 					<!-- A custom #trigger renders the same ghost Button as "Clear All
@@ -127,7 +124,7 @@
 							<Button
 								class="!text-ink-gray-5"
 								variant="ghost"
-								label="Add Filter"
+								:label="__('Add Filter')"
 								iconLeft="lucide-plus"
 							/>
 						</template>
@@ -136,7 +133,7 @@
 						v-if="model.length"
 						class="!text-ink-gray-5"
 						variant="ghost"
-						label="Clear All Filters"
+						:label="__('Clear All Filters')"
 						@click="clearAll(close)"
 					/>
 				</div>
@@ -146,6 +143,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { computed, nextTick, ref } from "vue";
 import { Button, Combobox, Popover, Select } from "frappe-ui";
 import { useDoctypeMeta } from "../../composables/useDoctypeMeta";

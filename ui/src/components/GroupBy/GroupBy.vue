@@ -16,10 +16,14 @@
 					:iconLeft="hideLabel ? undefined : 'lucide-folder'"
 					:class="model ? 'rounded-r-none' : ''"
 					:tooltip="model ? __('Grouped by {0}', [groupedLabels]) : undefined"
-					:aria-label="__('Group')"
+					:aria-label="__('Group', [], 'Grouping')"
 				>
 					<span v-if="!hideLabel" class="block max-w-60 truncate">
-						{{ model ? __("Grouped by {0}", [groupedLabels]) : __("Group") }}
+						{{
+							model
+								? __("Grouped by {0}", [groupedLabels])
+								: __("Group", [], "Grouping")
+						}}
 					</span>
 				</Button>
 				<Button
@@ -129,6 +133,7 @@ import { useDoctypeMeta } from "../../composables/useDoctypeMeta";
 import { translate as __ } from "../../utils/translate";
 import {
 	AGGREGATE_FUNCTIONS,
+	aggregateFunctionLabel,
 	findGroupByField,
 	getAggregateFields,
 	getGroupByFields,
@@ -181,12 +186,12 @@ const metaFields = computed(() => meta.value?.fields ?? []);
 // Pickers list fields alphabetically, as desk's report view does.
 const toOptions = (fields: GroupByField[]) =>
 	fields
-		.map((f) => ({ label: __(f.label), value: f.fieldname }))
+		.map((f) => ({ label: f.label, value: f.fieldname }))
 		.sort((a, b) => a.label.localeCompare(b.label));
 
 const groupedLabels = computed(() =>
 	(model.value?.fields ?? [])
-		.map((f) => __(findGroupByField(metaFields.value, f)?.label ?? f))
+		.map((f) => findGroupByField(metaFields.value, f)?.label ?? f)
 		.join(", ")
 );
 
@@ -206,7 +211,7 @@ function isTaken(i: number, aggregate: AggregateDraft) {
 // An aggregate already added isn't offered again, except in its own row.
 function functionOptions(i: number) {
 	return AGGREGATE_FUNCTIONS.map((f) => ({
-		label: __(f.label),
+		label: aggregateFunctionLabel(f.value),
 		value: f.value,
 		disabled: f.value === "count" && isTaken(i, { function: "count" }),
 	}));

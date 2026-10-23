@@ -14,9 +14,11 @@ def extract(fileobj, *args, **kwargs):
 	fileobj.seek(0)
 
 	for lineno, funcname, messages, comments in extract_python(fileobj, *args, **kwargs):
-		if funcname in ("_", "_lt"):
+		if funcname in ("_", "_lt", "N_"):
 			msgid = messages[0] if isinstance(messages, tuple) else messages
 			call = _take_call(calls_by_line, lineno, msgid)
+			if call and (not call.args or msgid not in _message_values(call.args[0])):
+				continue
 			context = _context(call) if call else None
 			if context and msgid:
 				funcname = "pgettext"
@@ -32,21 +34,37 @@ def _func_name(call):
 def _constant(node):
 	if isinstance(node, ast.Constant) and isinstance(node.value, str):
 		return node.value
+	if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+		left, right = _constant(node.left), _constant(node.right)
+		if left is not None and right is not None:
+			return left + right
 	return None
 
 
+def _message_values(node):
+	value = _constant(node)
+	if value is not None:
+		return {value}
+	if isinstance(node, ast.BoolOp):
+		return set().union(*(_message_values(value) for value in node.values))
+	if isinstance(node, ast.IfExp):
+		return _message_values(node.body) | _message_values(node.orelse)
+	return set()
+
+
 def _context(call):
-	"""Context is the third positional argument or the `context` keyword of `_()`."""
+	"""Context follows the message in `N_()`, or the language in `_()` and `_lt()`."""
 	for keyword in call.keywords:
 		if keyword.arg == "context":
 			return _constant(keyword.value)
-	if len(call.args) > 2:
-		return _constant(call.args[2])
+	context_index = 1 if _func_name(call) == "N_" else 2
+	if len(call.args) > context_index:
+		return _constant(call.args[context_index])
 	return None
 
 
 def _translation_calls(source):
-	"""Map line numbers to the `_()` / `_lt()` calls whose message is on them, in source order."""
+	"""Map message line numbers to translation calls in source order."""
 	by_line = {}
 	try:
 		nodes = ast.walk(ast.parse(source))
@@ -54,7 +72,7 @@ def _translation_calls(source):
 		return by_line
 
 	for node in nodes:
-		if isinstance(node, ast.Call) and _func_name(node) in ("_", "_lt"):
+		if isinstance(node, ast.Call) and _func_name(node) in ("_", "_lt", "N_"):
 			message_line = node.args[0].lineno if node.args else node.lineno
 			by_line.setdefault(message_line, []).append(node)
 

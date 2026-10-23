@@ -208,6 +208,28 @@ frappe.ui.form.ControlTextEditor = class ControlTextEditor extends frappe.ui.for
 		toolbar.addHandler("table", this.handle_table_actions);
 		this.add_toolbar_tooltips(toolbar);
 		this.dress_toolbar_pickers(toolbar);
+		const theme = this.quill.theme;
+		const is_snow = theme.constructor === Quill.import("themes/snow");
+		if (is_snow) {
+			const tooltip = theme.tooltip;
+			for (const [element, attribute, label] of [
+				[tooltip.root, "data-label", __("Link")],
+				[tooltip.root, "data-label-link", __("URL")],
+				[tooltip.root, "data-label-video", __("Video URL")],
+				[tooltip.root, "data-label-formula", __("Formula")],
+				[tooltip.root.querySelector("a.ql-action"), "data-label-edit", __("Edit")],
+				[tooltip.root.querySelector("a.ql-action"), "data-label-save", __("Save")],
+				[tooltip.root.querySelector("a.ql-remove"), "data-label", __("Remove")],
+			]) {
+				if (!element.hasAttribute(attribute)) element.setAttribute(attribute, label);
+			}
+		}
+		if (
+			(is_snow || theme.constructor === Quill.import("themes/bubble")) &&
+			theme.tooltip.textbox.getAttribute("data-video") === "Embed URL"
+		) {
+			theme.tooltip.textbox.setAttribute("data-video", __("Video URL"));
+		}
 	}
 
 	dress_toolbar_pickers(toolbar) {
@@ -346,7 +368,12 @@ frappe.ui.form.ControlTextEditor = class ControlTextEditor extends frappe.ui.for
 					el.title = opts.text + (opts.shortcut ? shortcut_hint(opts.shortcut) : "");
 				}
 				// the buttons are icon-only — give them a name too
-				if (!el.getAttribute("aria-label")) {
+				const current_label = el.getAttribute("aria-label");
+				const format = Array.from(el.classList)
+					.find((name) => name.startsWith("ql-"))
+					?.slice(3);
+				const quill_label = el.hasAttribute("value") ? `${format}: ${el.value}` : format;
+				if (!current_label || (el.tagName === "BUTTON" && current_label === quill_label)) {
 					el.setAttribute("aria-label", opts.text);
 				}
 			});

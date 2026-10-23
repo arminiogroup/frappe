@@ -261,9 +261,9 @@ def get_csv_content_from_google_sheets(url):
 	elif response.status_code == 400:
 		frappe.throw(
 			_(
-				'Google Sheets URL must end with "gid={number}". Copy and paste the URL from the browser address bar and try again.'
+				"Could not download this Google Sheet as CSV. Check the URL and make sure the sheet is publicly accessible."
 			),
-			title=_("Incorrect URL"),
+			title=_("Download Failed"),
 		)
 	else:
 		response.raise_for_status()

@@ -95,15 +95,20 @@ export default class Widget {
 		this.refresh();
 	}
 
-	set_title(max_chars) {
+	set_title(max_chars, context = null) {
 		let base = this.title || this.label || this.name;
 		let title = max_chars ? frappe.ellipsis(base, max_chars) : base;
 
-		this.title_field[0].innerHTML = `<span class="ellipsis" title="${__(title)}">${__(
-			title
-		)}</span>`;
+		this.title_field[0].innerHTML = `<span class="ellipsis" title="${__(
+			title,
+			null,
+			context
+		)}">${__(title, null, context)}</span>`;
 		if (max_chars) {
-			this.title_field[0].setAttribute("title", this.title || this.label);
+			this.title_field[0].setAttribute(
+				"title",
+				context ? __(base, null, context) : this.title || this.label
+			);
 		}
 		this.subtitle && this.subtitle_field.html(this.subtitle);
 	}

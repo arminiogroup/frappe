@@ -43,3 +43,13 @@ def extract(fileobj, *args, **kwargs):
 		for perm in data.get("permissions", [])
 		if "role" in perm
 	)
+
+	for action in data.get("actions", []):
+		for key in ("label", "group"):
+			if message := action.get(key):
+				yield (
+					get_line_number(text, key, message),
+					"_",
+					message,
+					[f"{key.title()} of an action in DocType '{doctype}'"],
+				)

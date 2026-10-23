@@ -24,10 +24,10 @@
 	>
 		<template #trigger>
 			<Button
-				:label="hideLabel ? undefined : 'Sort'"
+				:label="hideLabel ? undefined : __('Sort')"
 				:icon="hideLabel ? 'lucide-arrow-up-down' : undefined"
 				:iconLeft="!hideLabel ? 'lucide-arrow-up-down' : undefined"
-				aria-label="Sort"
+				:aria-label="__('Sort')"
 			/>
 		</template>
 	</Combobox>
@@ -37,7 +37,7 @@
 		<template #trigger="{ open }">
 			<Button
 				v-if="model.length > 1"
-				:label="'Sort'"
+				:label="__('Sort')"
 				:icon="hideLabel ? 'lucide-arrow-up-down' : undefined"
 				:iconLeft="!hideLabel ? 'lucide-arrow-up-down' : undefined"
 			>
@@ -53,7 +53,7 @@
 				<Button
 					class="relative rounded-r-none border-r focus-visible:z-10"
 					:icon="directionIcon(model[0].direction)"
-					:aria-label="model[0].direction === 'asc' ? 'Ascending' : 'Descending'"
+					:aria-label="model[0].direction === 'asc' ? __('Ascending') : __('Descending')"
 					@click.stop="toggleDirection(0)"
 				/>
 				<Button
@@ -88,7 +88,9 @@
 									class="relative rounded-r-none border-r focus-visible:z-10"
 									:icon="directionIcon(sort.direction)"
 									:aria-label="
-										sort.direction === 'asc' ? 'Ascending' : 'Descending'
+										sort.direction === 'asc'
+											? __('Ascending')
+											: __('Descending')
 									"
 									@click="toggleDirection(i)"
 								/>
@@ -99,22 +101,19 @@
 									size="md"
 									:modelValue="sort.fieldname"
 									:options="optionsFor(sort.fieldname)"
-									placeholder="Select field"
+									:placeholder="__('Select field')"
 									@update:selectedOption="(o) => updateSort(o, i)"
 								/>
 							</div>
 							<Button
 								variant="ghost"
 								icon="lucide-x"
-								aria-label="Remove sort"
+								:aria-label="__('Remove sort')"
 								@click="removeSort(i)"
 							/>
 						</div>
 					</template>
 				</Draggable>
-				<div v-else class="mb-3 flex h-7 items-center px-3 text-sm text-ink-gray-5">
-					Empty - Choose a field to sort by
-				</div>
 				<div class="flex items-center justify-between gap-2">
 					<!-- A custom #trigger renders the same ghost Button as "Clear Sort"
 					     beside it (gray-5, `+` icon, no chevron). The label is static, so
@@ -129,7 +128,7 @@
 							<Button
 								class="!text-ink-gray-5"
 								variant="ghost"
-								label="Add Sort"
+								:label="__('Add Sort')"
 								iconLeft="lucide-plus"
 							/>
 						</template>
@@ -138,7 +137,7 @@
 						v-if="model.length"
 						class="!text-ink-gray-5"
 						variant="ghost"
-						:label="'Clear Sort'"
+						:label="__('Clear Sort')"
 						@click="clearSort(close)"
 					/>
 				</div>
@@ -153,6 +152,7 @@ import { Button, Combobox, Popover } from "frappe-ui";
 // @ts-ignore — vuedraggable ships no bundled types
 import Draggable from "vuedraggable";
 import { useDoctypeMeta } from "../../composables/useDoctypeMeta";
+import { translate as __ } from "../../utils/translate";
 import { getSortOptions } from "./getSortOptions";
 import type { Sort, SortByProps, SortOption } from "./types";
 
@@ -187,7 +187,7 @@ function labelFor(fieldname: string): string {
 }
 
 const firstSortLabel = computed(() =>
-	model.value.length ? labelFor(model.value[0].fieldname) : "Sort"
+	model.value.length ? labelFor(model.value[0].fieldname) : __("Sort")
 );
 
 function directionIcon(direction: Sort["direction"]): string {

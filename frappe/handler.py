@@ -221,7 +221,7 @@ def upload_file():
 	if content is not None and (frappe.session.user == "Guest" or (user and not user.has_desk_access())):
 		filetype = guess_type(filename)[0]
 		if filetype not in ALLOWED_MIMETYPES:
-			frappe.throw(_("You can only upload JPG, PNG, GIF, PDF, TXT, CSV or Microsoft documents."))
+			frappe.throw(_("This file type is not allowed for this upload."))
 
 	if method:
 		method = frappe.get_attr(method)

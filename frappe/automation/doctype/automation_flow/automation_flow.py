@@ -151,9 +151,9 @@ class AutomationFlow(Document):
 
 	def validate_action_context(self, action):
 		if action.requires_document and not self.document_type:
-			frappe.throw(_("{0} requires a Document Type").format(action.label))
+			frappe.throw(_("{0} requires a Document Type").format(_(action.label)))
 		if action.supported_trigger_types and self.trigger_type not in action.supported_trigger_types:
-			frappe.throw(_("{0} does not support {1} triggers").format(action.label, self.trigger_type))
+			frappe.throw(_("{0} does not support {1} triggers").format(_(action.label), _(self.trigger_type)))
 
 	def validate_step(self, row):
 		row.step_type = row.step_type or "Action"
@@ -187,7 +187,7 @@ class AutomationFlow(Document):
 	def validate_trigger_config(self):
 		needs_doctype = self.trigger_type in DOC_TRIGGER_TYPES or self.trigger_type == "Date Based"
 		if needs_doctype and not self.document_type:
-			frappe.throw(_("{0} trigger requires a Document Type").format(self.trigger_type))
+			frappe.throw(_("{0} trigger requires a Document Type").format(_(self.trigger_type)))
 		if self.trigger_type == "Field Value Changed" and not self.trigger_field:
 			frappe.throw(_("Field Value Changed trigger requires a Trigger Field"))
 		if self.trigger_type == "Date Based" and not (self.date_field and self.date_direction):

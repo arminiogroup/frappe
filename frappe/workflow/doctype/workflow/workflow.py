@@ -246,7 +246,7 @@ class Workflow(Document):
 						"Workflow {0} on {1} uses the state field {2}. Every active workflow of a doctype must use the same field."
 					).format(
 						frappe.bold(other.name),
-						frappe.bold(self.document_type),
+						frappe.bold(_(self.document_type)),
 						frappe.bold(other.workflow_state_field),
 					)
 				)
@@ -268,7 +268,7 @@ class Workflow(Document):
 				frappe.throw(
 					_(
 						"Workflow {0} has the same priority and can govern the same {1}. Narrow the conditions of either workflow, or give them different priorities."
-					).format(frappe.bold(peer.name), frappe.bold(self.document_type))
+					).format(frappe.bold(peer.name), frappe.bold(_(self.document_type)))
 				)
 
 	def is_disjoint_from(self, other: "Workflow") -> bool:

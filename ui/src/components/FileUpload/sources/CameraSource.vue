@@ -20,23 +20,28 @@
 					<Button
 						variant="subtle"
 						icon-left="lucide-switch-camera"
-						label="Switch camera"
-						aria-label="Switch camera"
+						:label="__('Switch camera')"
+						:aria-label="__('Switch camera')"
 						@click="switchCamera"
 					/>
 					<Button
 						icon-left="lucide-camera"
-						label="Capture"
-						aria-label="Capture"
+						:label="__('Capture')"
+						:aria-label="__('Capture')"
 						@click="capture"
 					/>
 				</template>
 				<template v-else>
-					<Button variant="subtle" label="Retake" aria-label="Retake" @click="retake" />
+					<Button
+						variant="subtle"
+						:label="__('Retake')"
+						:aria-label="__('Retake')"
+						@click="retake"
+					/>
 					<Button
 						variant="solid"
-						label="Use photo"
-						aria-label="Use photo"
+						:label="__('Use photo')"
+						:aria-label="__('Use photo')"
 						@click="usePhoto"
 					/>
 				</template>
@@ -46,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../../utils/translate";
 // Camera source: opens the device camera with getUserMedia, previews the live
 // feed, and turns a captured frame into a PNG `File` emitted via `files`. The
 // MediaStream is always torn down — on unmount and whenever the camera view is
@@ -69,7 +75,7 @@ onBeforeUnmount(stop);
 
 async function start() {
 	if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-		error.value = "No camera is available on this device.";
+		error.value = __("No camera is available on this device.");
 		return;
 	}
 	try {
@@ -80,7 +86,7 @@ async function start() {
 		error.value = null;
 		if (video.value) video.value.srcObject = stream;
 	} catch {
-		error.value = "Could not access the camera. Check permissions and try again.";
+		error.value = __("Could not access the camera. Check permissions and try again.");
 	}
 }
 

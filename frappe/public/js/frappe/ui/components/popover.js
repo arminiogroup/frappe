@@ -50,7 +50,7 @@ frappe.ui.Popover = class Popover {
 
 		// the trigger's click is the toggle, so its own onclick would double
 		// up — drop it (same rule as Dropdown)
-		const button_opts = { label: __("Open"), ...opts.button };
+		const button_opts = { label: __("Open", null, "Access"), ...opts.button };
 		if (button_opts.onclick) {
 			console.warn(
 				"frappe.ui.Popover: button.onclick is ignored — the trigger's click toggles the panel"

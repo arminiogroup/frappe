@@ -9,6 +9,7 @@ import type {
   Tab,
 } from "./types";
 import { holdsChildRows } from "../Fields/rowIdentity";
+import { translateDocFieldText } from "../../utils/translateDocField";
 
 /**
  * Build a render-ready `FormLayoutSchema` from a doctype's flat meta `fields`,
@@ -79,7 +80,11 @@ export function compose(...decorators: Decorator[]): Decorator {
 }
 
 function newColumn(field?: RawMetaField): Column {
-  return { name: field?.fieldname, label: field?.label, fields: [] };
+  return {
+    name: field?.fieldname,
+    label: field ? translateDocFieldText(field, field.label) : undefined,
+    fields: [],
+  };
 }
 
 function newSection(field?: RawMetaField): Section {
@@ -87,7 +92,7 @@ function newSection(field?: RawMetaField): Section {
   const collapsible = !!field.collapsible;
   return {
     name: field.fieldname,
-    label: field.label,
+    label: translateDocFieldText(field, field.label),
     hideBorder: !!field.hide_border,
     collapsible,
     // Open by default, collapsible or not. The stored-layout path
@@ -156,13 +161,15 @@ export function mapField(
   const meta: FieldMeta = {
     fieldname: field.fieldname,
     fieldtype: field.fieldtype,
-    label: field.label,
+    parent: field.parent,
+    context: field.context,
+    label: translateDocFieldText(field, field.label),
     options: field.options,
     filters: field.filters,
     reqd: !!field.reqd,
     default: field.default,
     precision: coercePrecision(field.precision),
-    description: field.description,
+    description: translateDocFieldText(field, field.description),
     hidden: !!field.hidden,
     permlevel: field.permlevel,
     // Carried, not read here: `resolveLayout` needs it to tell a permlevel
@@ -222,7 +229,7 @@ export function buildLayoutFromMeta(
     if (field.fieldtype === TAB_BREAK) {
       tabs.push({
         name: field.fieldname,
-        label: field.label,
+        label: translateDocFieldText(field, field.label),
         dependsOn: field.depends_on,
         sections: [],
       });

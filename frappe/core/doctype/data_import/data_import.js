@@ -2853,7 +2853,11 @@ frappe.ui.form.on("Data Import", {
 			}
 			result_rows.push(kv_row(__("Skipped"), num(skipped_rows_count), skipped_rows_action));
 			result_rows.push(
-				kv_row(__("Failed"), num(failed_rows, "text-ink-red-6"), failed_rows_action)
+				kv_row(
+					__("Failed", null, "Data Import"),
+					num(failed_rows, "text-ink-red-6"),
+					failed_rows_action
+				)
 			);
 
 			// Show exact user-formatted date/time (instead of relative values like "yesterday").
@@ -3053,7 +3057,7 @@ frappe.ui.form.on("Data Import", {
 		stat_cards.push(`
 			<div class="diw-import-progress-stat flex flex-col items-center justify-center text-center gap-0.5 min-w-0" role="listitem">
 				<div class="value text-2xl-semibold text-ink-red-8">${failed}</div>
-				<div class="label text-sm text-ink-gray-6">${__("Failed")}</div>
+				<div class="label text-sm text-ink-gray-6">${__("Failed", null, "Data Import")}</div>
 			</div>
 		`);
 		const recent = Array.isArray(progress.recent_activity)

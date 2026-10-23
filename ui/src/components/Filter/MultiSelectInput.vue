@@ -8,13 +8,15 @@
 	<MultiSelect
 		:modelValue="selected"
 		:options="options"
-		:placeholder="placeholder ?? 'Select options'"
+		:placeholder="placeholder ?? __('Select options')"
 		variant="subtle"
 		@update:modelValue="(v) => emit('update:modelValue', v)"
 	/>
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
+import { translateSelectOption } from "../../utils/translateDocField";
 import { computed } from "vue";
 import { MultiSelect } from "frappe-ui";
 import type { FilterField } from "./types";
@@ -39,6 +41,6 @@ const options = computed(() =>
 		.split("\n")
 		.map((o) => o.trim())
 		.filter(Boolean)
-		.map((o) => ({ label: o, value: o }))
+		.map((o) => ({ label: translateSelectOption(props.field, o), value: o }))
 );
 </script>

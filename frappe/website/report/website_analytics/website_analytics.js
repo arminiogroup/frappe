@@ -37,7 +37,7 @@ frappe.query_reports["Website Analytics"] = {
 				{ value: "referrer", label: __("Referrer") },
 				{ value: "source", label: __("Source") },
 				{ value: "campaign", label: __("Campaign") },
-				{ value: "medium", label: __("Medium") },
+				{ value: "medium", label: __("Medium", null, "UTM Medium") },
 				{ value: "content", label: __("Content") },
 			],
 			default: "path",

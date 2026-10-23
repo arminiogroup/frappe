@@ -14,9 +14,9 @@
 		:modelValue="selected"
 		:options="options"
 		:loading="resource.loading && !resource.data"
-		:placeholder="placeholder ?? `Search ${(field.options ?? '').toLowerCase()}`"
+		:placeholder="placeholder ?? __('Search {0}', [__(field.options ?? '')])"
 		variant="subtle"
-		emptyText="No results found"
+		:emptyText="__('No results found')"
 		@update:modelValue="(v) => emit('update:modelValue', v)"
 		@update:query="onQuery"
 		@update:open="onOpen"
@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 import { toLinkOption } from "../Link/linkOption";
 import { computed, ref, watch } from "vue";
 import { MultiSelect, createResource, frappeRequest, debounce } from "frappe-ui";

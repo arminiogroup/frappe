@@ -14,6 +14,7 @@
  * no backend knowledge and is unit-testable with a fake transport.
  */
 import { computed, reactive, ref, type ComputedRef, type Ref } from "vue";
+import { translate as __ } from "../../utils/translate";
 import type {
   Restrictions,
   UploadArgs,
@@ -138,7 +139,7 @@ export function useUploader(options: UseUploaderOptions = {}): Uploader {
         continue;
       }
       if (isDuplicate(file)) {
-        errors.value.push(`"${file.name}" is already in the list.`);
+        errors.value.push(__('"{0}" is already in the list.', [file.name]));
         continue;
       }
       const item: UploadItem = reactive({
@@ -165,11 +166,11 @@ export function useUploader(options: UseUploaderOptions = {}): Uploader {
     const trimmed = url.trim();
     if (!trimmed) return null;
     if (!isAllowedUrl(trimmed)) {
-      errors.value.push("Only http(s) links are allowed.");
+      errors.value.push(__("Only http(s) links are allowed."));
       return null;
     }
     if (items.some((item) => item.source === "link" && item.link === trimmed)) {
-      errors.value.push(`"${trimmed}" is already in the list.`);
+      errors.value.push(__('"{0}" is already in the list.', [trimmed]));
       return null;
     }
     if (!canAddMoreInternal()) {
@@ -328,8 +329,8 @@ export function useUploader(options: UseUploaderOptions = {}): Uploader {
         item.status = "error";
         item.error =
           error?.name === "AbortError"
-            ? "Cancelled"
-            : error?.message || "Upload failed";
+            ? __("Cancelled")
+            : error?.message || __("Upload failed");
       } finally {
         controllers.delete(item.id);
       }
@@ -369,11 +370,11 @@ export function useUploader(options: UseUploaderOptions = {}): Uploader {
   /** Returns a friendly error string when the file is rejected, else null. */
   function validate(file: File): string | null {
     if (!isAllowedType(file, effectiveAllowedTypes())) {
-      return `"${file.name}" was skipped — file type not allowed.`;
+      return __('"{0}" was skipped — file type not allowed.', [file.name]);
     }
     const max = restrictions.max_file_size;
     if (max != null && file.size != null && file.size > max) {
-      return `"${file.name}" was skipped — exceeds ${formatBytes(max)}.`;
+      return __('"{0}" was skipped — exceeds {1}.', [file.name, formatBytes(max)]);
     }
     return null;
   }
@@ -387,7 +388,7 @@ export function useUploader(options: UseUploaderOptions = {}): Uploader {
 
   function maxFilesMessage(): string {
     const max = multiple ? restrictions.max_number_of_files : 1;
-    return `Only ${max} file${max === 1 ? "" : "s"} allowed.`;
+    return max === 1 ? __("Only {0} file allowed.", [max]) : __("Only {0} files allowed.", [max]);
   }
 
   return {

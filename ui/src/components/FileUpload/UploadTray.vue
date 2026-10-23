@@ -27,7 +27,7 @@
 			</span>
 			<button
 				type="button"
-				aria-label="Toggle"
+				:aria-label="__('Toggle')"
 				class="grid size-5 place-items-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-2"
 				@click="expanded = !expanded"
 			>
@@ -38,7 +38,7 @@
 			</button>
 			<button
 				type="button"
-				aria-label="Close"
+				:aria-label="__('Close')"
 				class="grid size-5 place-items-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-2"
 				@click="dismiss"
 			>
@@ -64,7 +64,7 @@
 						aria-hidden="true"
 					/>
 					<span v-else-if="item.status === 'error'" class="text-p-xs text-ink-red-8">
-						Failed
+						{{ __("Failed") }}
 					</span>
 					<span v-else class="shrink-0 text-p-xs text-ink-gray-5">
 						{{ Math.round(item.progress * 100) }}%
@@ -72,7 +72,7 @@
 					<button
 						v-if="item.status === 'uploading' && batch.cancel"
 						type="button"
-						aria-label="Cancel"
+						:aria-label="__('Cancel')"
 						class="grid size-4 place-items-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-2"
 						@click="batch.cancel(item.id)"
 					>
@@ -81,7 +81,7 @@
 					<button
 						v-if="item.status === 'error' && batch.retry"
 						type="button"
-						aria-label="Retry"
+						:aria-label="__('Retry')"
 						class="grid size-4 place-items-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-2"
 						@click="batch.retry(item.id)"
 					>
@@ -104,6 +104,7 @@
 </template>
 
 <script setup lang="ts">
+import { translate as __ } from "../../utils/translate";
 // App-root singleton: a minimized, Gmail/Drive-style floating progress card
 // (bottom-right by default; `side` picks the bottom corner) that observes the
 // module-level `uploadTray` store. Because the store outlives any one dialog,
@@ -148,11 +149,12 @@ const hasError = computed(() => failedCount.value > 0);
 const headerLabel = computed(() => {
 	const items = batches.value.flatMap((batch) => batch.items);
 	const done = items.filter((item) => item.status === "done").length;
-	if (allDone.value) return `Uploaded ${done} file${done === 1 ? "" : "s"}`;
+	if (allDone.value)
+		return done === 1 ? __("Uploaded {0} file", [done]) : __("Uploaded {0} files", [done]);
 	// Settled with failures and nothing uploading: report the split.
 	if (!isUploading.value && hasError.value)
-		return `${done} uploaded, ${failedCount.value} failed`;
-	return `Uploading ${done}/${items.length}`;
+		return __("{0} uploaded, {1} failed", [done, failedCount.value]);
+	return __("Uploading {0}/{1}", [done, items.length]);
 });
 
 // The ✕ is an explicit close: drop every batch, even ones that settled with a

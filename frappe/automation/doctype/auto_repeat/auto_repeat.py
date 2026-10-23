@@ -175,11 +175,9 @@ class AutoRepeat(Document):
 		auto_repeat_days = self.get_auto_repeat_days()
 		if len(set(auto_repeat_days)) != len(auto_repeat_days):
 			repeated_days = get_repeated(auto_repeat_days)
-			plural = "s" if len(repeated_days) > 1 else ""
-
 			frappe.throw(
-				_("Auto Repeat Day{0} {1} has been repeated.").format(
-					plural, frappe.bold(", ".join(repeated_days))
+				_("Auto repeat has duplicate days: {0}.").format(
+					frappe.bold(", ".join(_(day, context="Auto Repeat Day") for day in repeated_days))
 				)
 			)
 

@@ -477,7 +477,7 @@ class FormTimeline extends BaseTimeline {
 				icon_size: "sm",
 				creation: like_log.creation,
 				content: timeline_content,
-				title: "Like",
+				title: __("Like"),
 			});
 		});
 
@@ -527,16 +527,18 @@ class FormTimeline extends BaseTimeline {
 
 	setup_reply(communication_box, communication_doc) {
 		let actions = communication_box.find(".custom-actions");
-		let reply = $(`<a class="action-btn reply">${frappe.utils.icon("reply", "md")}</a>`).click(
-			() => {
+		let reply = $(`<a class="action-btn reply">${frappe.utils.icon("reply", "md")}</a>`)
+			.attr("title", __("Reply"))
+			.click(() => {
 				this.compose_mail(communication_doc);
-			}
-		);
+			});
 		let reply_all = $(
 			`<a class="action-btn reply-all">${frappe.utils.icon("reply-all", "md")}</a>`
-		).click(() => {
-			this.compose_mail(communication_doc, true);
-		});
+		)
+			.attr("title", __("Reply All"))
+			.click(() => {
+				this.compose_mail(communication_doc, true);
+			});
 		if (frappe.is_mobile()) {
 			this.add_dropdown_item(communication_box, [reply, reply_all]);
 		} else {
@@ -547,13 +549,20 @@ class FormTimeline extends BaseTimeline {
 	add_dropdown_item(timeline_box, menu_items) {
 		let more_actions = timeline_box.find(".more-actions > .dropdown-menu > li");
 		menu_items.forEach((m) => {
-			let action_name = m[0].classList[1];
-			let formatted_action_name =
-				String(action_name).charAt(0).toUpperCase() + String(action_name).slice(1);
+			let display_label = m.attr("title") || m.text();
 			m.empty();
-			m.append(
-				__("{0}", [frappe.utils.to_title_case(formatted_action_name.replace("-", " "))])
-			);
+			if (display_label) {
+				m.text(display_label);
+			} else {
+				let action_name = m[0].classList[1];
+				let formatted_action_name =
+					String(action_name).charAt(0).toUpperCase() + String(action_name).slice(1);
+				m.append(
+					__("{0}", [
+						frappe.utils.to_title_case(formatted_action_name.replace("-", " ")),
+					])
+				);
+			}
 			m.removeClass();
 			m.addClass("dropdown-item");
 			more_actions.append(m);

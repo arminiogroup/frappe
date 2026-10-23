@@ -5,6 +5,34 @@ export default class BulkOperations {
 	}
 
 	print(docs) {
+		const doctype = this.doctype;
+		const print_format_label = (name) => {
+			if (name === "Standard") return __("Standard");
+			const format = locals[":Print Format"]?.[name];
+			return doctype &&
+				this.doctype === doctype &&
+				frappe.get_meta(doctype)?.name === doctype &&
+				format?.name === name &&
+				format.standard === "Yes" &&
+				!cint(format.disabled) &&
+				format.docstatus < 2 &&
+				format.doc_type === doctype &&
+				["DocType", ""].includes(format.print_format_for || "") &&
+				frappe._messages[`${name}:Print Format Name`]
+				? frappe._messages[`${name}:Print Format Name`]
+				: name;
+		};
+		const on_make = (field) => {
+			const update = () =>
+				field.$input.find("option").each((_, option) => {
+					$(option).text(print_format_label(option.value));
+				});
+			field.$input
+				.off("select-change.print-format-name")
+				.on("select-change.print-format-name", update);
+			update();
+		};
+
 		const print_settings = frappe.model.get_doc(":Print Settings", "Print Settings");
 		const allow_print_for_draft = cint(print_settings.allow_print_for_draft);
 		const is_submittable = frappe.model.is_submittable(this.doctype);
@@ -58,13 +86,15 @@ export default class BulkOperations {
 					fieldtype: "Select",
 					label: __("Print Format"),
 					fieldname: "print_sel",
+					on_make,
 					options: frappe.meta.get_print_formats(this.doctype),
 					default: frappe.get_meta(this.doctype).default_print_format,
 				},
 				{
 					fieldtype: "Select",
-					label: __("Page Size"),
+					label: __("Page Size", null, "Print Settings"),
 					fieldname: "page_size",
+					context: "Print Settings",
 					options: frappe.meta.get_print_sizes(),
 					default: print_settings.pdf_page_size,
 				},

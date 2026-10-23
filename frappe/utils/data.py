@@ -31,6 +31,7 @@ from frappe.locale import get_date_format, get_first_day_of_the_week, get_number
 from frappe.types.filter import Filters, FilterSignature, FilterTuple
 from frappe.utils.deprecations import deprecated
 from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
+from frappe.utils.translations import N_
 
 DateTimeLikeObject = str | datetime.date | datetime.datetime
 NumericType = int | float
@@ -1532,6 +1533,194 @@ def __getattr__(name):
 			raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
+_ITALIAN_MONEY_FRACTION_FORMS = {
+	"Cent": (
+		N_("One cent", context="Currency fraction wording"),
+		N_("{0} cent", context="Currency fraction wording"),
+	),
+	"Fils": (
+		N_("One fils", context="Currency fraction wording"),
+		N_("{0} fils", context="Currency fraction wording"),
+	),
+	"Paisa": (
+		N_("One paisa", context="Currency fraction wording"),
+		N_("{0} paise", context="Currency fraction wording"),
+	),
+	"Poisha": (
+		N_("One poisha", context="Currency fraction wording"),
+		N_("{0} poisha", context="Currency fraction wording"),
+	),
+	"Penny": (
+		N_("One penny", context="Currency fraction wording"),
+		N_("{0} pence", context="Currency fraction wording"),
+	),
+	"Piastre": (
+		N_("One piastre", context="Currency fraction wording"),
+		N_("{0} piastres", context="Currency fraction wording"),
+	),
+	"Ban": (
+		N_("One ban", context="Currency fraction wording"),
+		N_("{0} bani", context="Currency fraction wording"),
+	),
+	"Centimo": (
+		N_("One céntimo", context="Currency fraction wording"),
+		N_("{0} céntimos", context="Currency fraction wording"),
+	),
+	"Luma": (
+		N_("One luma", context="Currency fraction wording"),
+		N_("{0} luma", context="Currency fraction wording"),
+	),
+	"Chetrum": (
+		N_("One chhetrum", context="Currency fraction wording"),
+		N_("{0} chhetrum", context="Currency fraction wording"),
+	),
+	"Thebe": (
+		N_("One thebe", context="Currency fraction wording"),
+		N_("{0} thebe", context="Currency fraction wording"),
+	),
+	"Sen": (
+		N_("One sen", context="Currency fraction wording"),
+		N_("{0} sen", context="Currency fraction wording"),
+	),
+	"Fen": (
+		N_("One fen", context="Currency fraction wording"),
+		N_("{0} fen", context="Currency fraction wording"),
+	),
+	"Fillér": (
+		N_("One fillér", context="Currency fraction wording"),
+		N_("{0} fillér", context="Currency fraction wording"),
+	),
+	"Dinar": (
+		N_("One dinar", context="Currency fraction wording"),
+		N_("{0} dinar", context="Currency fraction wording"),
+	),
+	"Chon": (
+		N_("One chon", context="Currency fraction wording"),
+		N_("{0} chon", context="Currency fraction wording"),
+	),
+	"Dirham": (
+		N_("One dirham", context="Currency fraction wording"),
+		N_("{0} dirham", context="Currency fraction wording"),
+	),
+	"Grosz": (
+		N_("One grosz", context="Currency fraction wording"),
+		N_("{0} grosz", context="Currency fraction wording"),
+	),
+	"Para": (
+		N_("One para", context="Currency fraction wording"),
+		N_("{0} para", context="Currency fraction wording"),
+	),
+	"Öre": (
+		N_("One öre", context="Currency fraction wording"),
+		N_("{0} öre", context="Currency fraction wording"),
+	),
+	"Tenge": (
+		N_("One tenge", context="Currency fraction wording"),
+		N_("{0} tenge", context="Currency fraction wording"),
+	),
+	"Centavo": (
+		N_("One centavo", context="Currency fraction wording"),
+		N_("{0} centavos", context="Currency fraction wording"),
+	),
+	"Centime": (
+		N_("One centime", context="Currency fraction wording"),
+		N_("{0} centimes", context="Currency fraction wording"),
+	),
+}
+
+_ITALIAN_MONEY_FRACTION_CONFIGS = {
+	"XCD": ("Cent", 100, "Cent", "Cent"),
+	"AWG": ("Cent", 100, "Cent", "Cent"),
+	"AUD": ("Cent", 100, "Cent", "Cent"),
+	"BSD": ("Cent", 100, "Cent", "Cent"),
+	"BHD": ("Fils", 1000, "fils", "Fils"),
+	"BDT": ("Paisa", 100, "paisa", "Poisha"),
+	"BBD": ("Cent", 100, "Cent", "Cent"),
+	"BZD": ("Cent", 100, "Cent", "Cent"),
+	"BMD": ("Cent", 100, "Cent", "Cent"),
+	"CAD": ("Cent", 100, "Cent", "Cent"),
+	"KYD": ("Cent", 100, "Cent", "Cent"),
+	"EGP": ("Piastre[F]", 100, "piastra", "Piastre"),
+	"USD": ("Cent", 100, "Cent", "Cent"),
+	"ERN": ("Cent", 100, "Cent", "Cent"),
+	"FKP": ("Penny", 100, "penny", "Penny"),
+	"FJD": ("Cent", 100, "Cent", "Cent"),
+	"GIP": ("Penny", 100, "penny", "Penny"),
+	"GYD": ("Cent", 100, "Cent", "Cent"),
+	"HKD": ("Cent", 100, "Cent", "Cent"),
+	"INR": ("Paisa", 100, "paisa", "Paisa"),
+	"IQD": ("Fils", 1000, "fils", "Fils"),
+	"JMD": ("Cent", 100, "Cent", "Cent"),
+	"JOD": ("Fils", 1000, "fils", "Fils"),
+	"KES": ("Cent", 100, "Cent", "Cent"),
+	"KWD": ("Fils", 1000, "fils", "Fils"),
+	"LBP": ("Piastre", 100, "piastra", "Piastre"),
+	"LRD": ("Cent", 100, "Cent", "Cent"),
+	"MUR": ("Cent", 100, "Cent", "Cent"),
+	"MDL": ("Ban", 100, "ban", "Ban"),
+	"NAD": ("Cent", 100, "Cent", "Cent"),
+	"NPR": ("Paisa", 100, "paisa", "Paisa"),
+	"NZD": ("Cent", 100, "Cent", "Cent"),
+	"PKR": ("Paisa", 100, "paisa", "Paisa"),
+	"RON": ("Bani", 100, "ban", "Ban"),
+	"SHP": ("Penny", 100, "penny", "Penny"),
+	"SCR": ("Cent", 100, "Cent", "Cent"),
+	"SLL": ("Cent", 100, "Cent", "Cent"),
+	"SGD": ("Cent", 100, "Cent", "Cent"),
+	"SBD": ("Cent", 100, "Cent", "Cent"),
+	"SOS": ("Cent", 100, "Cent", "Cent"),
+	"ZAR": ("Cent", 100, "Cent", "Cent"),
+	"LKR": ("Cent", 100, "Cent", "Cent"),
+	"SDG": ("Piastre", 100, "piastra", "Piastre"),
+	"SRD": ("Cent", 100, "Cent", "Cent"),
+	"SZL": ("Cent", 100, "Cent", "Cent"),
+	"SYP": ("Piastre", 100, "piastra", "Piastre"),
+	"TTD": ("Cent", 100, "Cent", "Cent"),
+	"AED": ("Fils", 100, "fils", "Fils"),
+	"GBP": ("Penny", 100, "penny", "Penny"),
+	"VEF": ("Centimos", 100, "céntimo", "Centimo"),
+	"YER": ("Fils", 100, "fils", "Fils"),
+	"ZWL": ("Cent", 100, "Cent", "Cent"),
+	"AMD": ("Luma", 100, "luma", "Luma"),
+	"BTN": ("Chetrum", 100, "chhetrum", "Chetrum"),
+	"BWP": ("Thebe", 100, "thebe", "Thebe"),
+	"BND": ("Sen", 100, "sen", "Sen"),
+	"KHR": ("Sen", 100, "sen", "Sen"),
+	"IDR": ("Sen", 100, "sen", "Sen"),
+	"MYR": ("Sen", 100, "sen", "Sen"),
+	"CNY": ("Fen", 100, "fen", "Fen"),
+	"TWD": ("Fen", 100, "fen", "Fen"),
+	"HUF": ("Fillér", 100, "fillér", "Fillér"),
+	"IRR": ("Dinar", 100, "dinar", "Dinar"),
+	"KPW": ("Chon", 100, "chon", "Chon"),
+	"LYD": ("Dirham", 1000, "dirham", "Dirham"),
+	"PLN": ("Grosz", 100, "grosz", "Grosz"),
+	"QAR": ("Dirham", 100, "dirham", "Dirham"),
+	"RSD": ("Para", 100, "para", "Para"),
+	"SEK": ("Öre", 100, "öre", "Öre"),
+	"TMT": ("Tenge", 100, "tenge", "Tenge"),
+	"CRC": ("Céntimo", 100, "céntimo", "Centimo"),
+	"PEN": ("Céntimo", 100, "céntimo", "Centimo"),
+	"ARS": ("Centavo", 100, "centavo", "Centavo"),
+	"BOB": ("Centavo", 100, "centavo", "Centavo"),
+	"BRL": ("Centavo", 100, "centavo", "Centavo"),
+	"CVE": ("Centavo", 100, "centavo", "Centavo"),
+	"COP": ("Centavo", 100, "centavo", "Centavo"),
+	"CUP": ("Centavo", 100, "centavo", "Centavo"),
+	"DOP": ("Centavo", 100, "centavo", "Centavo"),
+	"GTQ": ("Centavo", 100, "centavo", "Centavo"),
+	"HNL": ("Centavo", 100, "centavo", "Centavo"),
+	"MXN": ("Centavo", 100, "centavo", "Centavo"),
+	"MZN": ("Centavo", 100, "centavo", "Centavo"),
+	"NIO": ("Centavo", 100, "centavo", "Centavo"),
+	"PHP": ("Centavo", 100, "centavo", "Centavo"),
+	"CHF": ("Rappen[K]", 100, "rappen", "Centime"),
+	"CDF": ("Centime", 100, "centime", "Centime"),
+	"HTG": ("Centime", 100, "centime", "Centime"),
+	"MAD": ("Centime", 100, "centime", "Centime"),
+}
+
+
 #
 # convert currency to words
 #
@@ -1544,6 +1733,7 @@ def money_in_words(
 	from frappe.utils import get_defaults
 
 	_ = frappe._
+	fraction_is_default = fraction_currency is None
 
 	try:
 		# note: `flt` returns 0 for invalid input and we don't want that
@@ -1607,6 +1797,99 @@ def money_in_words(
 				+ " "
 				+ _(fraction_currency, context="Currency")
 			)
+
+	if (
+		fraction_is_default
+		and main_currency == "EUR"
+		and fraction_currency == "Cent"
+		and fraction_units == 100
+		and in_million
+		and frappe.local.lang == "it"
+		and _(main_currency, context="Currency") == main_currency
+		and _(fraction_currency, context="Currency") == fraction_currency
+	):
+		from decimal import InvalidOperation
+
+		from num2words import num2words
+
+		try:
+			italian_out = num2words(n, lang="it", to="currency", currency="EUR")
+		except (NotImplementedError, OverflowError, InvalidOperation):
+			pass
+		else:
+			if int(main) and int(main) % 1000000 == 0:
+				italian_out = italian_out.replace(" euro", " di euro", 1)
+			out = italian_out[0].upper() + italian_out[1:]
+
+	if fraction_is_default and frappe.local.lang == "it" and in_million:
+		policy = _ITALIAN_MONEY_FRACTION_CONFIGS.get(main_currency)
+		if (
+			policy
+			and (fraction_currency, fraction_units) == policy[:2]
+			and _(main_currency, context="Currency") == main_currency
+			and _(fraction_currency, context="Currency") == policy[2]
+			and cint(fraction)
+		):
+			one_source, many_source = _ITALIAN_MONEY_FRACTION_FORMS[policy[3]]
+			one_frame = _(one_source, context="Currency fraction wording")
+			many_frame = _(many_source, context="Currency fraction wording")
+			if one_frame != one_source and (
+				many_frame != many_source or policy[3] not in ("Paisa", "Piastre", "Centime")
+			):
+				fraction_count = int(float(f"0.{fraction}") * fraction_units)
+				minor = one_frame if fraction_count == 1 else many_frame.format(fraction_in_words().lower())
+				if main == "0":
+					out = minor[0].upper() + minor[1:]
+				else:
+					out = (
+						_(main_currency, context="Currency")
+						+ " "
+						+ in_words(main, in_million).title()
+						+ " "
+						+ _("and")
+						+ " "
+						+ minor[0].lower()
+						+ minor[1:]
+					)
+
+	if (
+		fraction_is_default
+		and main_currency == "DZD"
+		and fraction_currency == "Centime"
+		and fraction_units == 100
+		and in_million
+		and frappe.local.lang == "it"
+		and _(main_currency, context="Currency") == main_currency
+		and _(fraction_currency, context="Currency") == "centime"
+		and _("Dinars", context="Currency") == "Dinari"
+		and (int(main) or cint(fraction))
+	):
+		one_major = _("One dinar", context="Currency major wording")
+		many_major = _("{0} dinars", context="Currency major wording")
+		million_major = _("{0} dinars", context="Currency major wording (whole millions)")
+		one_source, many_source = _ITALIAN_MONEY_FRACTION_FORMS["Centime"]
+		one_minor = _(one_source, context="Currency fraction wording")
+		many_minor = _(many_source, context="Currency fraction wording")
+		if (
+			one_major != "One dinar"
+			and many_major != "{0} dinars"
+			and million_major != "{0} dinars"
+			and one_minor != one_source
+			and many_minor != many_source
+		):
+			if main != "0":
+				major_frame = million_major if int(main) and int(main) % 1000000 == 0 else many_major
+				major = one_major if int(main) == 1 else major_frame.format(in_words(main, in_million))
+			if cint(fraction):
+				fraction_count = int(float(f"0.{fraction}") * fraction_units)
+				minor = one_minor if fraction_count == 1 else many_minor.format(fraction_in_words().lower())
+			if main == "0":
+				out = minor
+			elif cint(fraction):
+				out = major + " " + _("and") + " " + minor[0].lower() + minor[1:]
+			else:
+				out = major
+			out = out[0].upper() + out[1:]
 
 	if main_currency == "DZD":
 		return _("{0}.", context="Money in words").format(out)

@@ -10,7 +10,9 @@
  * Consumers that talk to a non-Frappe backend inject their own `UploadTransport`
  * into `useUploader` / the dialog; this module is only the default.
  */
-import { useFileUpload as useFrappeFileUpload } from "frappe-ui";
+import { getConfig, useFileUpload as useFrappeFileUpload } from "frappe-ui";
+import { translate as __ } from "../../utils/translate";
+import { formatBytes } from "./useUploader";
 import type { UploadArgs, UploadTransport } from "./types";
 
 /** Default Frappe folder for detached uploads (FormLayout fields lack a docname). */
@@ -60,15 +62,43 @@ async function uploadWhole(
   }
 ): Promise<{ file_url: string }> {
   const { upload } = useFrappeFileUpload();
-  const result = await upload(file, {
-    private: args.isPrivate,
-    folder: args.folder || DEFAULT_FOLDER,
-    optimize: args.optimize,
-    max_width: args.maxWidth,
-    max_height: args.maxHeight,
-    signal: ctx.signal,
-    onProgress: ({ loaded, total }) => ctx.onProgress(loaded, total),
-  });
+  const maxFileSize = Number(getConfig("maxFileSize"));
+  let result;
+  try {
+    result = await upload(file, {
+      private: args.isPrivate,
+      folder: args.folder || DEFAULT_FOLDER,
+      optimize: args.optimize,
+      max_width: args.maxWidth,
+      max_height: args.maxHeight,
+      signal: ctx.signal,
+      onProgress: ({ loaded, total }) => ctx.onProgress(loaded, total),
+    });
+  } catch (error: any) {
+    if (error?.kind === "network") error.message = __("Upload failed");
+    else if (error?.kind === "abort") error.message = __("Upload cancelled");
+    else if (error?.kind === "file-size") {
+      error.message = __("This file is {0}; the limit is {1}.", [formatBytes(file.size), formatBytes(maxFileSize)]);
+    } else if (
+      error?.kind === "server" &&
+      !error.messages.length &&
+      !error.response?._error_message &&
+      !error.response?.message
+    ) {
+      if (error.response?.exc_type === "MaxFileSizeReachedError") {
+        const limit = Number(getConfig("maxFileSize"));
+        error.message =
+          Number.isFinite(limit) && limit > 0
+            ? __("File size exceeded the maximum allowed size of {0}.", [
+                formatBytes(limit),
+              ])
+            : __("File size exceeds the maximum allowed limit.");
+      } else {
+        error.message = __("Upload failed");
+      }
+    }
+    throw error;
+  }
   return { file_url: result.file_url };
 }
 
@@ -100,7 +130,7 @@ async function uploadChunked(
 
       const onAbort = () => xhr.abort();
       if (ctx.signal.aborted) {
-        reject(new DOMException("Upload cancelled", "AbortError"));
+        reject(new DOMException(__("Upload cancelled"), "AbortError"));
         return;
       }
       ctx.signal.addEventListener("abort", onAbort, { once: true });
@@ -111,12 +141,12 @@ async function uploadChunked(
 
       xhr.addEventListener("error", () => {
         ctx.signal.removeEventListener("abort", onAbort);
-        reject(new Error("Upload failed"));
+        reject(new Error(__("Upload failed")));
       });
 
       xhr.addEventListener("abort", () => {
         ctx.signal.removeEventListener("abort", onAbort);
-        reject(new DOMException("Upload cancelled", "AbortError"));
+        reject(new DOMException(__("Upload cancelled"), "AbortError"));
       });
 
       xhr.onreadystatechange = () => {
@@ -169,14 +199,14 @@ async function uploadChunked(
     offset += chunkSize;
   }
   if (!result?.file_url) {
-    throw new Error("Upload completed but no file URL was returned");
+    throw new Error(__("Upload completed but no file URL was returned"));
   }
   return result;
 }
 
 /** Best-effort error text from a failed chunk response. */
 function uploadErrorMessage(xhr: XMLHttpRequest): string {
-  if (xhr.status === 413) return "File size exceeds the maximum allowed limit.";
+  if (xhr.status === 413) return __("File size exceeds the maximum allowed limit.");
   try {
     const error = JSON.parse(xhr.responseText);
     if (error?._server_messages) {
@@ -195,5 +225,5 @@ function uploadErrorMessage(xhr: XMLHttpRequest): string {
   } catch {
     /* non-JSON error body */
   }
-  return `Upload failed (${xhr.status || "network error"})`;
+  return __("Upload failed ({0})", [xhr.status || __("Network error")]);
 }

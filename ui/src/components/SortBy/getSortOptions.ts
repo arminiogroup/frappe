@@ -1,3 +1,5 @@
+import { translate as __ } from "../../utils/translate";
+import { translateDocFieldText } from "../../utils/translateDocField";
 import type { RawMetaField } from "../FormLayout/types";
 import type { SortOption } from "./types";
 
@@ -18,13 +20,15 @@ const NO_VALUE_FIELDS = new Set([
 
 /** Standard fields every doctype can be sorted on, appended after the meta
  *  fields (matches `crm.api.doc.sort_options`). */
-const STANDARD_FIELDS: ReadonlyArray<{ label: string; fieldname: string }> = [
-  { label: "Name", fieldname: "name" },
-  { label: "Created On", fieldname: "creation" },
-  { label: "Last Modified", fieldname: "modified" },
-  { label: "Modified By", fieldname: "modified_by" },
-  { label: "Owner", fieldname: "owner" },
-];
+function standardFields(): ReadonlyArray<{ label: string; fieldname: string }> {
+  return [
+    { label: __("Name"), fieldname: "name" },
+    { label: __("Created On"), fieldname: "creation" },
+    { label: __("Last Modified"), fieldname: "modified" },
+    { label: __("Modified By"), fieldname: "modified_by" },
+    { label: __("Owner"), fieldname: "owner" },
+  ];
+}
 
 const toOption = (label: string, fieldname: string): SortOption => ({
   label,
@@ -40,7 +44,9 @@ const toOption = (label: string, fieldname: string): SortOption => ({
 export function getSortOptions(fields: RawMetaField[]): SortOption[] {
   const fieldOptions = fields
     .filter((f) => !NO_VALUE_FIELDS.has(f.fieldtype) && f.label && f.fieldname)
-    .map((f) => toOption(f.label as string, f.fieldname));
-  const standard = STANDARD_FIELDS.map((f) => toOption(f.label, f.fieldname));
+    .map((f) =>
+      toOption(translateDocFieldText(f, f.label) as string, f.fieldname)
+    );
+  const standard = standardFields().map((f) => toOption(f.label, f.fieldname));
   return [...fieldOptions, ...standard];
 }

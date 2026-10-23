@@ -9,7 +9,7 @@ import frappe
 from frappe.automation_engine.actions.base import get_action_registry
 from frappe.automation_engine.api import trial_run
 from frappe.automation_engine.registry import clear_automation_cache
-from frappe.automation_engine.runner import RUN, _failure_key
+from frappe.automation_engine.runner import RUN, _failure_key, _simulated_wait, _wait_seconds
 from frappe.automation_engine.tests.test_actions import public_dns
 from frappe.automation_engine.tests.test_runner import (
 	AutomationRunnerTestCase,
@@ -19,9 +19,47 @@ from frappe.automation_engine.tests.test_runner import (
 	make_todo,
 	set_field,
 )
+from frappe.tests import UnitTestCase
 
 QUEUE = "Automation Trigger Queue"
 REPLY_EVENT = "tests.reply"
+
+
+class TestWaitMessages(UnitTestCase):
+	def test_simulated_wait_translates_units_without_changing_the_duration(self):
+		self.addCleanup(frappe.set_user, frappe.session.user)
+		frappe.set_user("translator@example.com")
+		self.addCleanup(setattr, frappe.local, "lang", frappe.local.lang)
+		units = {
+			"Seconds": ("secondo", "secondi", "second", "seconds", 1),
+			"Minutes": ("minuto", "minuti", "minute", "minutes", 60),
+			"Hours": ("ora", "ore", "hour", "hours", 3600),
+			"Days": ("giorno", "giorni", "day", "days", 86400),
+		}
+
+		def translations(lang):
+			return (
+				{"Waited {0} (simulated)": "Attesa simulata: {0}"} if lang and lang.startswith("it") else {}
+			)
+
+		with patch("frappe.translate.get_all_translations", side_effect=translations):
+			for lang in ("it", "it-IT", "it_IT", "en", None):
+				frappe.local.lang = lang
+				for unit, (singular, plural, english_singular, english_plural, seconds) in units.items():
+					for value in (-2, -1, 0, 1, 2, 14):
+						with self.subTest(lang=lang, unit=unit, value=value):
+							params = {"value": value, "unit": unit}
+							if lang and lang.startswith("it"):
+								label = singular if abs(value) == 1 else plural
+								expected = f"Attesa simulata: {value} {label}"
+							else:
+								label = english_singular if abs(value) == 1 else english_plural
+								expected = f"Waited {value} {label} (simulated)"
+							self.assertEqual(_simulated_wait(params), expected)
+							self.assertEqual(_wait_seconds(params), value * seconds)
+							self.assertEqual(params, {"value": value, "unit": unit})
+			frappe.local.lang = "it"
+			self.assertEqual(_simulated_wait({"value": 1}), "Attesa simulata: 1 minuto")
 
 
 @contextmanager

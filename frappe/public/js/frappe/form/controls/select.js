@@ -1,3 +1,5 @@
+import { selectOptionContext } from "../../utils/select_option_context";
+
 frappe.ui.form.ControlSelect = class ControlSelect extends frappe.ui.form.ControlData {
 	static html_element = "select";
 	static trigger_change_on_input_event = false;
@@ -75,11 +77,9 @@ frappe.ui.form.ControlSelect = class ControlSelect extends frappe.ui.form.Contro
 		if (this.$input) {
 			var selected = this.$input.find(":selected").val();
 			this.$input.empty();
-			frappe.ui.form.add_options(
-				this.$input,
-				options || [],
-				this.df.sort_options,
-				this.df.context || this.df.parent || this.doctype
+			const field = { ...this.df, parent: this.df.parent || this.doctype };
+			render_options(this.$input, options || [], this.df.sort_options, (raw_option) =>
+				parse_option(raw_option, this.df.context || this.df.parent || this.doctype, field)
 			);
 
 			if (value === undefined && selected) {
@@ -109,12 +109,18 @@ frappe.ui.form.ControlSelect = class ControlSelect extends frappe.ui.form.Contro
 };
 
 frappe.ui.form.add_options = function (input, options_list, sort, doctype) {
+	return render_options(input, options_list, sort, (raw_option) =>
+		parse_option(raw_option, doctype)
+	);
+};
+
+function render_options(input, options_list, sort, parse) {
 	let $select = $(input);
 	if (!Array.isArray(options_list)) {
 		return $select;
 	}
 
-	let options = options_list.map((raw_option) => parse_option(raw_option, doctype));
+	let options = options_list.map(parse);
 	if (sort) {
 		options = options.sort((a, b) => cstr(a.label).localeCompare(cstr(b.label)));
 	}
@@ -133,7 +139,7 @@ frappe.ui.form.add_options = function (input, options_list, sort, doctype) {
 	$select.get(0).selectedIndex = 0;
 	$select.trigger("select-change");
 	return $select;
-};
+}
 
 // add <option> list to <select>
 (function ($) {
@@ -155,7 +161,7 @@ frappe.ui.form.add_options = function (input, options_list, sort, doctype) {
 	};
 })(jQuery);
 
-function parse_option(v, doctype) {
+function parse_option(v, doctype, field) {
 	let value = null;
 	let label = null;
 	let is_disabled = false;
@@ -169,10 +175,16 @@ function parse_option(v, doctype) {
 
 		if (is_value_null && is_label_null && typeof v !== "object") {
 			value = v;
-			label = __(v, null, doctype);
+			label = __(v, null, field ? selectOptionContext(v, field, frappe._messages) : doctype);
 		} else {
 			value = is_value_null ? "" : v.value;
-			label = is_label_null ? __(value, null, doctype) : __(v.label, null, doctype);
+			label = is_label_null
+				? __(
+						value,
+						null,
+						field ? selectOptionContext(value, field, frappe._messages) : doctype
+				  )
+				: __(v.label, null, doctype);
 		}
 	}
 

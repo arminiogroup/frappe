@@ -369,7 +369,7 @@ frappe.ui.Tree = class {
 				icon: "external-link",
 				variant: "ghost",
 				size: "xs",
-				title: __("Open"),
+				title: __("Open", null, "Access"),
 				onclick: () => frappe.set_route("Form", doctype, data.name),
 			})
 		).appendTo($head);

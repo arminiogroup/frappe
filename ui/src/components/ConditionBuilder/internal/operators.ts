@@ -1,3 +1,4 @@
+import { translate as __ } from "../../../utils/translate";
 // The operator table is composed rather than copied, per ADR-0008.
 import { getOperators } from "../../Filter/operators";
 import type { OperatorOption } from "../../Filter/operators";
@@ -76,13 +77,12 @@ export const NUMERIC_FIELDTYPES = [
   "Rating",
 ];
 
-const IS_NOT: ConditionOperatorOption = { label: "Is not", value: "is not" };
-
 /** The operators this component can write, for a field of this type. */
 export function conditionOperators(
   fieldtype: string,
   fieldname?: string
 ): ConditionOperatorOption[] {
+  const IS_NOT: ConditionOperatorOption = { label: __("Is not", [], "Filter Operator"), value: "is not" };
   const offered = getOperators(fieldtype, fieldname).filter(isWritable);
   const is = offered.findIndex((option) => option.value === "is");
   if (is !== -1) offered.splice(is + 1, 0, IS_NOT);

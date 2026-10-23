@@ -398,7 +398,7 @@ frappe.views.CommunicationComposer = class {
 				},
 				options: () =>
 					formats.map((format) => ({
-						label: format,
+						label: this.print_format_label(format),
 						selected:
 							!!fields.attach_document_print.get_value() &&
 							fields.select_print_format.get_value() === format,
@@ -1310,6 +1310,33 @@ frappe.views.CommunicationComposer = class {
 		}
 	}
 
+	print_format_label(name) {
+		if (name === "Standard") return __("Standard");
+		const format = locals[":Print Format"]?.[name];
+		return this.frm?.doctype &&
+			this.frm.doctype === this.frm.meta?.name &&
+			format?.name === name &&
+			format.standard === "Yes" &&
+			!cint(format.disabled) &&
+			format.docstatus < 2 &&
+			format.doc_type === this.frm.meta.name &&
+			["DocType", ""].includes(format.print_format_for || "") &&
+			frappe._messages[`${name}:Print Format Name`]
+			? frappe._messages[`${name}:Print Format Name`]
+			: name;
+	}
+
+	localize_print_format_options(field) {
+		const update = () =>
+			field.$input.find("option").each((_, option) => {
+				$(option).text(this.print_format_label(option.value));
+			});
+		field.$input
+			.off("select-change.print-format-name")
+			.on("select-change.print-format-name", update);
+		update();
+	}
+
 	render_print_card_meta() {
 		const $meta = this.$composer?.find(".email-composer-print-card__meta");
 		if (!$meta?.length) return;
@@ -1317,7 +1344,7 @@ frappe.views.CommunicationComposer = class {
 		const fields = this.dialog.fields_dict;
 		const lang = fields.print_language?.get_value() || "";
 		const parts = [
-			fields.select_print_format?.get_value(),
+			this.print_format_label(fields.select_print_format?.get_value()),
 			fields.select_letter_head?.get_value(),
 			this._language_labels?.[lang] || lang,
 		];
@@ -1398,6 +1425,7 @@ frappe.views.CommunicationComposer = class {
 				this.sync_print_menu?.();
 			},
 		});
+		this.localize_print_format_options(settings.fields_dict.print_format);
 		settings.show();
 	}
 
@@ -1407,6 +1435,7 @@ frappe.views.CommunicationComposer = class {
 
 		if (this.frm) {
 			const print_formats = frappe.meta.get_print_formats(this.frm.meta.name);
+			this.localize_print_format_options(fields.select_print_format);
 			$(fields.select_print_format.input)
 				.empty()
 				.add_options(print_formats)

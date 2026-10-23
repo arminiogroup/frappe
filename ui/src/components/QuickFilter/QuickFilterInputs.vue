@@ -102,6 +102,7 @@ import {
 	quickValue,
 } from "./quickFilters";
 import type { Filter, FilterField, FilterOperator, FilterValue } from "../Filter/types";
+import { translate as __ } from "../../utils/translate";
 // Shared, fieldtype-aware value inputs (ADR-0004), same subset the Filter control
 // mounts. No form-context injections are provided, so deep-injection inputs fall
 // back to site defaults — fine for a bare filter input.
@@ -260,7 +261,8 @@ function setValue(field: FilterField, value: FilterValue) {
 }
 
 const operatorSymbol = (op: FilterOperator) => (op === "equals" ? "=" : "≈");
-const operatorLabel = (op: FilterOperator) => (op === "equals" ? "Equals" : "Like");
+const operatorLabel = (op: FilterOperator) =>
+	op === "equals" ? __("Equals", [], "Filter Operator") : __("Like", [], "Filter Operator");
 
 /** Flip the input's operator like ↔ equals on click (no menu). With a value, the
  *  stored condition flips in place under the new operator (and the override is
@@ -297,6 +299,8 @@ function bareField(field: FilterField, overrides: Partial<FieldMeta> = {}): Fiel
 		fieldname: field.fieldname,
 		fieldtype: field.fieldtype,
 		options: field.options,
+		parent: field.parent,
+		context: field.context,
 		placeholder: field.label,
 		...overrides,
 	};
