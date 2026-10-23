@@ -5,15 +5,15 @@ from pathlib import Path
 from unittest.mock import patch
 
 from bs4 import BeautifulSoup
-from frappe.model.document import Document
-from frappe.model.meta import Meta
-from frappe.translate import print_language
-from frappe.utils.print_format_generator import PrintFormatGenerator
-from frappe.www.printview import get_print_filename
 from jinja2 import FileSystemLoader
 
 import frappe
+from frappe.model.document import Document
+from frappe.model.meta import Meta
+from frappe.translate import print_language
 from frappe.utils import jinja as jinja_module
+from frappe.utils.print_format_generator import PrintFormatGenerator
+from frappe.www.printview import get_print_filename
 
 
 class TestPrintDocumentTitleLocalization(unittest.TestCase):
@@ -24,6 +24,7 @@ class TestPrintDocumentTitleLocalization(unittest.TestCase):
 			"response": frappe._dict(),
 			"form_dict": frappe._dict(),
 			"message_log": [],
+			"flags": frappe._dict(),
 		}.items():
 			previous = getattr(frappe.local, key, None)
 			setattr(frappe.local, key, value)
@@ -33,6 +34,12 @@ class TestPrintDocumentTitleLocalization(unittest.TestCase):
 		self.meta = Meta.__new__(Meta)
 		self.meta.__dict__.update(metadata)
 		self.meta.fields = [frappe._dict(field) for field in metadata["fields"]]
+		print_format_metadata = json.loads(
+			(self.source / "printing/doctype/print_format/print_format.json").read_text()
+		)
+		self.print_format_meta = Meta.__new__(Meta)
+		self.print_format_meta.__dict__.update(print_format_metadata)
+		self.print_format_meta.fields = [frappe._dict(field) for field in print_format_metadata["fields"]]
 
 	def render(self, *, language="it", messages=None, doctype="User", name="QA-0001", preview=False):
 		doc = Document.__new__(Document)
@@ -103,6 +110,11 @@ class TestPrintDocumentTitleLocalization(unittest.TestCase):
 			),
 			patch.object(frappe.local, "jenv_restricted", environment, create=True),
 			patch.object(frappe.local, "jenv_unrestricted", environment, create=True),
+			patch.object(
+				frappe,
+				"get_meta",
+				side_effect=lambda doctype: {"Print Format": self.print_format_meta}[doctype],
+			),
 			patch("frappe.utils.pdf.get_chrome_pdf", side_effect=deliver),
 		):
 			if preview:

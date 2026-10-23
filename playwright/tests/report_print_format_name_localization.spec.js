@@ -28,6 +28,10 @@ const paths = [
 ];
 const sources = Object.fromEntries(paths.map((path) => [path, read(path)]));
 sources.printFormatMeta = read("frappe/frappe/printing/doctype/print_format/print_format.json");
+// The production factory imports this actual helper; the classic-control harness strips imports.
+sources.comboboxEnabled = read(
+	"frappe/frappe/public/js/frappe/form/controls/link_combobox.js"
+).match(/frappe\.ui\.form\.is_combobox_link_enabled = function \(\) \{[\s\S]*?\n\};/)[0];
 sources.jquery = readFileSync(nodeRequire.resolve("jquery"), "utf8");
 sources.awesomplete = readFileSync(nodeRequire.resolve("awesomplete"), "utf8");
 sources.selectContext = nodeRequire("esbuild").transformSync(
@@ -230,6 +234,7 @@ async function load({ initialRecords = [], serverRecords = records } = {}) {
  w.locals.DocType["Print Format"] = deliveredMeta;
  w.frappe.meta.sync(deliveredMeta);
  w.eval(read("frappe/frappe/public/js/frappe/model/sync.js"));
+	w.eval(sources.comboboxEnabled);
 	w.eval(read("frappe/frappe/public/js/frappe/form/controls/control.js").replace(/^import .*;\\n/gm, ""));
 	w.eval(read("frappe/frappe/public/js/frappe/request.js"));
 	$.ajax = (options) => {

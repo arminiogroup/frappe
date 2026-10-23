@@ -215,6 +215,10 @@ const paths = [
 const sources = Object.fromEntries(
 	paths.map((p) => [p, fs.readFileSync(APP + "/frappe/public/js/frappe/" + p, "utf8")])
 );
+// The production factory imports this actual helper; the classic-control harness strips imports.
+sources.comboboxEnabled = fs
+	.readFileSync(APP + "/frappe/public/js/frappe/form/controls/link_combobox.js", "utf8")
+	.match(/frappe\.ui\.form\.is_combobox_link_enabled = function \(\) \{[\s\S]*?\n\};/)[0];
 sources.jquery = fs.readFileSync(require.resolve("jquery"), "utf8");
 sources.awesomplete = fs.readFileSync(require.resolve("awesomplete"), "utf8");
 sources.settings = JSON.parse(
@@ -376,6 +380,7 @@ async function run(page, body, options = {}) {
 						.replace('import BaseAwesomplete from "awesomplete";', "")
 						.replace("export default class Awesomplete", "class Awesomplete")
 				);
+				w.eval(sources.comboboxEnabled);
 				for (const p of [
 					"form/controls/base_control.js",
 					"form/controls/base_input.js",
